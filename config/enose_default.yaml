@@ -1,0 +1,59 @@
+project:
+  name: neuromorphic-enose-fpga
+  version: 0.1
+
+paths:
+  raw_dir: data/raw
+  meta_dir: data/meta
+
+acquisition:
+  sample_rate_hz: 1.0
+  duration_sec: 600          # 10 minutes
+  warmup_sec: 0              # optional (can be >0 to discard initial samples)
+  timestamp: "unix_ms"
+
+xadc:
+  enable: true
+  # Linux IIO channels (typical). We'll auto-detect device + scale if possible.
+  channels:
+    - name: mq135
+      iio_channel_index: 0
+    - name: mq3
+      iio_channel_index: 1
+    - name: mq4
+      iio_channel_index: 2
+  # Optional additional scaling (e.g., if you want to convert to Volts manually)
+  # If null -> uses IIO scale if found, else raw.
+  extra_scale: null
+
+bme688:
+  enable: true
+  i2c_bus: 1
+  i2c_addr: 0x76
+  fields: [temperature_c, humidity_rh, gas_resistance_ohm]
+
+preprocess:
+  baseline_sec: 30
+  smoothing_window: 3   # moving average, 1=off
+  normalize: true
+
+encoding:
+  type: delta
+  # thresholds after normalization (initial guess)
+  thresholds:
+    mq135: 0.15
+    mq3: 0.15
+    mq4: 0.15
+    bme_gas: 0.20
+    temperature_c: 0.10
+    humidity_rh: 0.10
+
+labels:
+  classes: [Fresh, Warning, Spoiled]
+
+experiment_defaults:
+  chamber_volume_l: 0.8
+  fan: true
+  purge_mode: "open_lid_fan"
+  purge_until_stable_sec: 120
+  notes: ""

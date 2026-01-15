@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (НЕ качваме сурови експерименти по default)
+data/raw/*
+data/processed/*
+data/meta/*
+!data/raw/.keep
+!data/processed/.keep
+!data/meta/.keep
+
+# Logs
+*.log
+
+# Vivado / FPGA build artifacts
+fpga/vivado/**/proj/
+fpga/vivado/**/.Xil/
+fpga/vivado/**/*.jou
+fpga/vivado/**/*.log
+fpga/vivado/**/*.str
+fpga/vivado/**/ip_user_files/
+fpga/vivado/**/sim/
+fpga/vivado/**/runs/
+fpga/vivado/**/cache/
+fpga/vivado/**/hw_handoff/
+*.bit
+*.bin
+*.ltx
+*.hwh
+
+# Exports
+exports/

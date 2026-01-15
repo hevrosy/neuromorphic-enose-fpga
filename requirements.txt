@@ -1,0 +1,14 @@
+numpy
+pandas
+pyyaml
+matplotlib
+
+# На PYNQ обикновено има доста неща preinstalled.
+# За BME688 - избери едно от двете (ще го решим при интеграция):
+# bme680
+# adafruit-circuitpython-bme680
+# smbus2
+
+# За обучение на PC (по-късно):
+# torch
+# snntorch
