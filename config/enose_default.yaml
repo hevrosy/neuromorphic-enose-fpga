@@ -44,9 +44,9 @@ encoding:
     mq135: 0.15
     mq3: 0.15
     mq4: 0.15
-    bme_gas: 0.20
     temperature_c: 0.10
     humidity_rh: 0.10
+    gas_resistance_ohm: 0.20
 
 labels:
   classes: [Fresh, Warning, Spoiled]
