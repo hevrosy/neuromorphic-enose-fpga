@@ -10,5 +10,6 @@ matplotlib
 # smbus2
 
 # За обучение на PC (по-късно):
-# torch
-# snntorch
+torch
+numpy
+
