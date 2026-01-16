@@ -63,64 +63,39 @@
 ## Quickstart (Windows 11, offline)
 
 ### 1) Create and activate venv
-```powershell
+```
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 If you train, install training deps (PyTorch):
-
-powershell
-Копиране на код
 python -m pip install -r requirements_train.txt
 2) Generate synthetic raw/meta runs
-powershell
-Копиране на код
 python scripts\generate_synthetic_runs.py --config config\enose_default.yaml --runs-per-class 6 --batches 3 --seed 1234
 3) Build processed dataset (preprocess + windowing)
-powershell
-Копиране на код
 python scripts\build_dataset.py --config config\enose_default.yaml --val-batch B03 --window-len 10 --stride 1 --out data\processed
 Optional preview:
-
-powershell
-Копиране на код
 python scripts\preview_processed.py
 Train SNN (offline)
 4) Train (Torch)
-powershell
-Копиране на код
 python -m src.models.snn_train --config config\enose_default.yaml --epochs 20 --batch 256 --lr 0.001 --nh 32 --wlen 10 --thh 1.0 --tho 1.0 --leakh 4 --leako 4 --beta 10.0 --device cpu --out exports\snn_ckpt.pt
 5) Roundtrip check (Torch vs Golden float)
-powershell
-Копиране на код
 python -m scripts.roundtrip_check --config config\enose_default.yaml --ckpt exports\snn_ckpt.pt --val data\processed\val_windows.npz --n 512
 6) Export weights (int8)
-powershell
-Копиране на код
 python -m src.models.export_weights --ckpt exports\snn_ckpt.pt --outdir exports
 7) Spike profiling + Quant check
-powershell
-Копиране на код
 python -m scripts.spike_profile --config config\enose_default.yaml --data data\processed\val_windows.npz --max 5000
 python -m scripts.quant_roundtrip_check --config config\enose_default.yaml --ckpt exports\snn_ckpt.pt --val data\processed\val_windows.npz --outdir exports --n 1024
 FPGA emulator (contract-first verification)
 The emulator consumes the same spike-stream contract planned for hardware:
-
 AXI-Stream input: 32-bit spike mask word per timestep (12 LSBs used)
-
 AXI-Lite control/status/result registers
-
 Run evaluation through the emulator (uses exported int8 weights dequantized to float for golden inference):
-
-powershell
-Копиране на код
 python -m scripts.emulator_eval --config config\enose_default.yaml --val data\processed\val_windows.npz --exports exports --n 2000 --window-len 10
 Note on confidence: confidence is currently computed from output spike counts. If all output counts are zero in a window, confidence becomes 0. This metric will be refined later for hardware (e.g., membrane-based confidence).
 
-Repository structure
-text
-Копиране на код
+Repository structure :
+
 neuromorphic-enose-fpga/
   README.md
   LICENSE
