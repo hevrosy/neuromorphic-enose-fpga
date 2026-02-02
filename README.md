@@ -35,9 +35,9 @@
 - Експерименти: docs/06_experiments.md
 
 
-## What we have so far (milestones)
+## What we have so far 
 
-### ✅ Commit 3 — Offline dataset pipeline (no hardware required)
+### ✅ Commit 3 — Offline dataset pipeline 
 - Synthetic e-nose runs generator (CSV + JSON metadata)
 - Preprocess + windowing builder → `train_windows.npz`, `val_windows.npz`
 - Quick plotting/preview helper
