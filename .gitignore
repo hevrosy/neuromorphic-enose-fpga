@@ -26,21 +26,22 @@ data/meta/*
 # Logs
 *.log
 
-# Vivado / FPGA build artifacts
-fpga/vivado/**/proj/
-fpga/vivado/**/.Xil/
-fpga/vivado/**/*.jou
-fpga/vivado/**/*.log
-fpga/vivado/**/*.str
-fpga/vivado/**/ip_user_files/
-fpga/vivado/**/sim/
-fpga/vivado/**/runs/
-fpga/vivado/**/cache/
-fpga/vivado/**/hw_handoff/
-*.bit
-*.bin
-*.ltx
-*.hwh
+# Vivado project files (само RTL + scripts)
+*.xpr
+*.runs/
+*.cache/
+*.hw/
+*.ip_user_files/
+*.gen/
+*.sim/
+*.srcs/
+vivado*.log
+vivado*.jou
+webtalk*.log
+webtalk*.jou
 
+# overlay output (.bit + .hwh)
+!fpga/overlays/**/*.bit
+!fpga/overlays/**/*.hwh
 # Exports
 exports/
