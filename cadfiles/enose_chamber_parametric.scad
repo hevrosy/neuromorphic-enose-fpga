@@ -12,7 +12,7 @@ $fn = 60; // Curve resolution for smooth 3D printing
 // --- 1. VIEW MODE ---
 // "assembly"     = Exploded 3D view of all components
 // "print_layout" = All parts arranged flat on the XY plane for STL export
-view_mode = "print_layout"; 
+view_mode = "assembly"; 
 
 // --- 2. GLOBAL DIMENSIONS (MAIN CHAMBER) ---
 fc_w = 144;          // Internal chamber width
@@ -221,7 +221,11 @@ if (view_mode == "assembly") {
     color("Beige", 0.9) translate([0, 0, h_out + 26 + explode_gap*6]) fan_dome_v2();
     
 } else if (view_mode == "print_layout") {
-   
+   color("SteelBlue")      translate([0, 0, 0]) flow_chamber();
+    color("LimeGreen")      translate([-180, 0, 0]) sensor_plate();
+    color("DarkOrange")     translate([180, 0, 0]) diffuser_insert();
+    color("LightSlateGray") translate([0, 180, 26]) rotate([180, 0, 0]) lid_pro();
     color("Beige")          translate([-180, 180, 17]) rotate([180, 0, 0]) fan_dome_v2();
+    color("DeepSkyBlue")    translate([180, 180, 0]) tpu_gaskets();
     
 }
