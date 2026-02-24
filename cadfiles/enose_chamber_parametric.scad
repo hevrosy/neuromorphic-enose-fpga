@@ -1,21 +1,21 @@
 // ============================================================================
 // PROJECT: Advanced E-Nose Fluidic Chamber
-// VERSION: 1.0.1 (Ultimate Aerodynamic Release - FIXED AIRFLOW)
+// VERSION: 1.0.2 (Production Release)
 // DESCRIPTION: A professional, 100% support-free FDM 3D printable chamber 
 //              for Electronic Nose (VOC) sensor arrays. Features a closed-loop 
-//              tangential vortex airflow, zero-leak TPU gaskets, and universal 
-//              sensor mounting.
+//              tangential vortex airflow, zero-leak TPU gaskets, a 40mm laminar 
+//              diffuser, and universal MOX sensor mounting.
 // ============================================================================
 
 $fn = 60; // Curve resolution for smooth 3D printing
 
 // ============================================================================
-// 🎛️ PARAMETER CONTROL PANEL
+// PARAMETER CONTROL PANEL
 // ============================================================================
 
 // --- 1. VIEW MODE ---
-// Change to "assembly" to see the exploded 3D CAD view.
-// Change to "print_layout" to arrange all parts flat on the XY plane for STL export.
+// "assembly"     = Exploded 3D CAD view to visualize the stack.
+// "print_layout" = Arranges all parts flat on the XY plane for STL export.
 view_mode = "assembly"; 
 
 // --- 2. GLOBAL DIMENSIONS (MAIN CHAMBER) ---
@@ -46,7 +46,7 @@ gasket_h = 3.2;      // Print height (Crushes down to 2.4mm when bolts are tight
 tol = 0.2;           // Tolerance clearance for snug fit into grooves
 
 // ============================================================================
-// 🛠️ GEOMETRY GENERATION
+// GEOMETRY GENERATION
 // ============================================================================
 h_out = fc_h + bot_t; // Total calculated outer base height
 
@@ -95,7 +95,7 @@ module flow_chamber() {
 
 // ----------------------------------------------------------------------------
 // COMPONENT 2: UNIVERSAL SENSOR PLATE
-// Features a 7mm generic grid to mount MQ-series, BME688, or any custom PCBs.
+// Features a 7mm generic grid to mount MQ-series, BME688, or custom PCBs.
 // ----------------------------------------------------------------------------
 module sensor_plate() {
     difference() {
@@ -109,9 +109,8 @@ module sensor_plate() {
         // Central wire routing cutout
         translate([(125/2) - 5, 0, 1.5]) cube([15, 30, 5], center=true);
         
-        // 7mm Universal Breadboard Grid
+        // 7mm Universal Breadboard Grid (Excludes mounting areas)
         for(x = [-50 : 7 : 50], y = [-50 : 7 : 50]) {
-            // Keep exclusion zones around main mounts and wire cutout
             if(sqrt(pow(x - sp_mount_xy/2, 2) + pow(y - sp_mount_xy/2, 2)) > 8 && 
                sqrt(pow(x + sp_mount_xy/2, 2) + pow(y - sp_mount_xy/2, 2)) > 8 &&
                sqrt(pow(x - sp_mount_xy/2, 2) + pow(y + sp_mount_xy/2, 2)) > 8 &&
@@ -124,25 +123,25 @@ module sensor_plate() {
 }
 
 // ----------------------------------------------------------------------------
-// COMPONENT 3: FLUSH HONEYCOMB DIFFUSER
-// Straightens turbulent airflow into a uniform laminar breeze over the sensors.
+// COMPONENT 3: 40MM FLUSH HONEYCOMB DIFFUSER
+// Straightens turbulent cyclonic airflow into a uniform laminar breeze.
 // ----------------------------------------------------------------------------
 module diffuser_insert() {
-    diff_h = 20; // 20mm clearance created above the sensor plate
+    diff_h = 40; // 40mm height creates a massive laminar calm zone over the sensors
     
     difference() {
         union() {
-            // Main ring
+            // Main frame
             difference() {
                 rounded_box(114, 114, diff_h, 10);
                 translate([0, 0, -1]) rounded_box(110, 110, diff_h + 2, 8);
             }
-            // Honeycomb Grid
+            // 8mm thick Honeycomb Grid
             intersection() {
                 rounded_box(110, 110, 8, 8);
                 hex_grid(114, 114, 8, 3.5, 1.2);
             }
-            // Integrated solid 20mm legs in the corners
+            // Integrated solid legs in the corners
             for (x = [-sp_mount_xy/2, sp_mount_xy/2], y = [-sp_mount_xy/2, sp_mount_xy/2]) {
                 translate([x, y, 0]) cylinder(h=diff_h, d=12);
             }
@@ -212,8 +211,8 @@ module lid_pro() {
 }
 
 // ----------------------------------------------------------------------------
-// COMPONENT 5: ULTIMATE FAN DOME (FIXED: Aerodynamic "Sweeping Bell")
-// Features massive internal clearance and suspended pillars for max airflow.
+// COMPONENT 5: ULTIMATE FAN DOME (Aerodynamic "Sweeping Bell")
+// Features massive internal clearance, suspended pillars, and PC4-M6 inlet.
 // ----------------------------------------------------------------------------
 module fan_dome_ultimate() { 
     dh = 26; // Internal clearance height
@@ -224,23 +223,23 @@ module fan_dome_ultimate() {
     difference() { 
         // 1. Aerodynamic Outer Shell
         hull() { 
-            rounded_box(ow, ow, 4, 10); 
-            translate([0, 0, 16]) rounded_box(68, 68, 0.1, 8); 
-            translate([0, 0, th - 2]) rounded_box(56, 56, 2, 4); 
+            rounded_box(ow, ow, 4, 10); // Solid sealing flange
+            translate([0, 0, 16]) rounded_box(68, 68, 0.1, 8); // Smooth taper
+            translate([0, 0, th - 2]) rounded_box(56, 56, 2, 4); // Flat roof
         } 
         
         // 2. The Internal Magic (Sweeping Void with Suspended Pillars)
         difference() {
             // THE MASSIVE VOID: Wide base tapering smoothly up to the fan intake.
-            // Provides maximum airflow around the fan body.
+            // Provides maximum airflow around the fan body from the return vents.
             hull() {
                 translate([0, 0, -0.1]) rounded_box(ow - 2*wt, ow - 2*wt, 5, 8); // Wide capture zone (92mm)
-                translate([0, 0, 16]) rounded_box(68, 68, 0.1, 6); // Smooth taper
+                translate([0, 0, 16]) rounded_box(68, 68, 0.1, 6); // Taper
                 translate([0, 0, dh]) rounded_box(58, 58, 0.1, 4); // Fan intake area
             }
             
             // SUSPENDED PILLARS: These hang from the ceiling down to Z=14.5.
-            // They rest precisely on the fan frame corners, allowing max airflow around them.
+            // They rest precisely on the 20mm fan frame corners to prevent shell cracking upon tightening.
             for(x=[-fan_mount, fan_mount], y=[-fan_mount, fan_mount]) { 
                 translate([x, y, 14.5]) cylinder(h=dh, d=10); 
             } 
@@ -252,7 +251,7 @@ module fan_dome_ultimate() {
             translate([x, y, th - 2.5]) cylinder(h=3, d1=4.2, d2=8.5); 
         } 
         
-        // 4. Side Wire Port (Positioned at Z=17, safely above the fan blades)
+        // 4. Side Wire Port (Positioned safely above the fan blades)
         translate([0, -(ow/2), 17]) rotate([90, 0, 0]) cylinder(h=30, d=5, center=true); 
 
         // 5. Top Pneumatic Port Inlet (For PC4-M6 fitting, threading into the 6mm roof)
@@ -265,7 +264,7 @@ module fan_dome_ultimate() {
 // MUST be printed in TPU, 106% Flow, and Concentric top/bottom pattern!
 // ----------------------------------------------------------------------------
 module tpu_gaskets() {
-    // Bottom Gasket (Main Chamber Seal)
+    // Bottom Gasket (Main Chamber Seal - 151.4mm)
     difference() {
         rounded_box(151.4 - tol, 151.4 - tol, gasket_h, 20.7);
         translate([0, 0, -1]) rounded_box(144.6 + tol, 144.6 + tol, gasket_h + 2, 17.3);
@@ -287,12 +286,14 @@ module hex_grid(w, l, h, cr, wt) { x_s = cr*1.5; y_s = cr*sqrt(3); difference() 
 // RENDER & EXPORT LOGIC
 // ============================================================================
 if (view_mode == "assembly") {
-    // Creates a beautiful exploded view showing exactly how the parts stack.
+    // Creates an exploded view showing exactly how the parts stack.
     explode_gap = 35; 
+    diff_h = 40; // Match diffuser height for correct visual stacking
     
     color("SteelBlue", 0.8) flow_chamber();
     color("LimeGreen") translate([0, 0, bot_t + standoff_h + explode_gap]) sensor_plate();
-    color("DarkOrange") translate([0, 0, bot_t + standoff_h + 20 + explode_gap*2]) rotate([180,0,0]) diffuser_insert();
+    
+    color("DarkOrange") translate([0, 0, bot_t + standoff_h + diff_h + explode_gap*2]) rotate([180,0,0]) diffuser_insert();
     
     color("DeepSkyBlue", 0.9) translate([0, 0, h_out + explode_gap*3]) 
         difference() { rounded_box(151.4 - tol, 151.4 - tol, gasket_h, 20.7); translate([0, 0, -1]) rounded_box(144.6 + tol, 144.6 + tol, gasket_h + 2, 17.3); }

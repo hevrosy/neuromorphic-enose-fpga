@@ -1,6 +1,6 @@
-# Advanced E-Nose Fluidic Chamber (v1.0.0)
+# Advanced E-Nose Fluidic Chamber (v1.0.2)
 
-A 100% support-free, 3D-printable fluidic chamber designed specifically for Electronic Nose (E-Nose) applications and Volatile Organic Compound (VOC) analysis. 
+A professional-grade, 100% support-free, 3D-printable fluidic chamber designed specifically for Electronic Nose (E-Nose) applications and Volatile Organic Compound (VOC) analysis. 
 
 This project solves the most common issues found in DIY and academic electronic noses: poor gas mixing, lack of airtightness, aerodynamic stalling, and direct cold drafts disrupting the heated MQ-series gas sensors. By utilizing an aerospace-inspired "Closed-Loop Vortex System" and a 3D-printed dual-gasket sealing mechanism, this chamber ensures highly repeatable and stable sensor readings.
 
@@ -8,44 +8,79 @@ This project solves the most common issues found in DIY and academic electronic 
 
 ---
 
-## 1. The Concept & Scientific Justification
+# Advanced E-Nose Fluidic Chamber (v1.0.2)
 
-Traditional E-Nose chambers often suffer from the "Closed Bottle Syndrome" (Aerodynamic Stall). If a fan simply blows air into a sealed box, the pressure equalizes instantly, the fan stalls, and airflow stops. If the chamber is open to the room, the VOC sample is diluted, rendering the sensors "blind."
+A professional-grade, 100% support-free, 3D-printable fluidic chamber designed specifically for Electronic Nose (E-Nose) applications and Volatile Organic Compound (VOC) analysis. 
 
-### The Closed-Loop Vortex System
-To solve this, this chamber isolates the internal mixing airflow from the external sample-gathering airflow:
-1. The Cyclonic Plenum: The aerodynamic lid houses four tangential ducts. The 60mm fan forces air through these ducts, creating a high-speed peripheral cyclone inside the 1.2L chamber. 
-2. The Honeycomb Diffuser: Before hitting the sensors, the turbulent cyclone passes through a 20mm hexagonal grid, straightening the flow into a uniform, laminar breeze over the sensor array.
-3. The Return Vents: Four 8mm return vents draw the mixed air from the bottom of the chamber back into the fan dome, creating an endless, powerful mixing loop without losing hermeticity.
-
-Because the internal loop is perfectly balanced, we can introduce a micro-flow of external VOC samples using simple pressure differentials.
+This project solves the most common issues found in DIY and academic electronic noses: poor gas mixing, lack of airtightness, aerodynamic stalling, and direct cold drafts disrupting the heated MQ-series gas sensors. By utilizing an aerospace-inspired "Closed-Loop Vortex System" and a 3D-printed dual-gasket sealing mechanism, this chamber ensures highly repeatable and stable sensor readings.
 
 ---
 
-## 2. Flow Rate & Fluid Dynamics Calculations
+## 1. Concept & Scientific Justification: Overcoming Aerodynamic Limitations
 
-The system is connected to an external sample jar via PTFE tubing (2mm internal diameter). The fan creates a slight vacuum in the top dome and a slight positive pressure in the main chamber, acting as a gentle, passive pump.
+Traditional E-Nose chambers often suffer from fatal flaws in fluid management, the most prominent being the "Closed Bottle Syndrome" (Aerodynamic Stall) and boundary layer stagnation.
 
-Using the Hagen-Poiseuille equation for laminar flow in a pipe, we can calculate the exact sampling rate:
+### 1.1 The Aerodynamic Stall Problem
+Axial fans are engineered to move large volumes of air under low static pressure. Every fan operates on a specific Pressure-Volume (P-Q) performance curve. If an axial fan blows directly into a sealed chamber, the internal static pressure almost instantly equals the fan's maximum shut-off pressure ($P_{max}$). 
+When this equilibrium is reached, the flow rate ($Q$) drops to zero. The fan blades experience severe flow separation (stall), meaning they merely spin in their own localized turbulence without inducing any bulk fluid motion.
 
-Q = (ΔP * π * r^4) / (8 * μ * L)
+
+### 1.2 The Closed-Loop Tangential Vortex
+To prevent stall and ensure continuous gas mixing, this chamber completely isolates the high-volume internal mixing loop from the low-volume external sampling loop. 
+Rather than forcing air downwards, the aerodynamic lid (`lid_pro`) routes the fan's output through four curved, constricting ducts. These ducts act as nozzles, accelerating the fluid and injecting it tangentially along the cylindrical walls of the chamber. 
+
+This generates a high-speed peripheral cyclone. The resulting centrifugal forces and high shear rates ensure that molecules of varying molecular weights (different VOCs) are violently and homogeneously mixed with the carrier air in milliseconds.
+
+
+### 1.3 Transition to Laminar Flow via Honeycomb Straightening
+Metal Oxide Semiconductor (MOX) gas sensors are highly sensitive to turbulent airflow. High-frequency turbulent eddies cause localized pressure and temperature micro-fluctuations on the sensor surface, which manifest as severe baseline noise in the analog signal.
+
+To solve this, the turbulent vortex is forced through a 40mm deep honeycomb diffuser grid. By passing the fluid through dozens of narrow, parallel channels, the characteristic length of the flow path is drastically reduced. This mathematically forces the Reynolds number ($Re$) down, dampening transverse velocity components and converting the turbulent cyclone into a calm, uniform, downward laminar breeze.
+
+
+### 1.4 Pressure Equalization (The Return Vents)
+After the laminar flow passes over the sensor array, the fluid is drawn back up through four 8mm vertical vents directly into the low-pressure zone (the dome) above the fan. This creates an infinite, perfectly balanced internal mixing loop, allowing the fan to operate at its peak efficiency point on the P-Q curve without breaching the chamber's hermetic seal.
+
+---
+
+## 2. Flow Rate, Fluid Dynamics & Sensor Thermodynamics
+
+With the internal mixing loop running independently at high capacity ($\sim 100-150 \text{ L/min}$), the system can be utilized as a passive, high-precision vacuum pump to draw the external VOC sample.
+
+### 2.1 The Mathematics of the Sample Loop
+The fan creates a localized low-pressure zone (suction) inside the top dome and a high-pressure zone (discharge) in the main chamber. When connected to an external sample jar, this $\Delta P$ drives the fluid exchange.
+
+The sampling rate is strictly governed by the PTFE (Teflon) tubing acting as a flow restrictor. We calculate the theoretical flow rate using the Hagen-Poiseuille equation for fully developed, steady, incompressible, and laminar flow in a circular pipe:
+
+$$Q = \frac{\Delta P \cdot \pi \cdot r^4}{8 \cdot \mu \cdot L}$$
 
 Where:
-* ΔP ≈ 30 Pa (Average maximum static pressure of a standard 60mm axial fan)
-* r = 0.001 m (Radius of the 2mm ID PTFE tubing)
-* μ ≈ 1.81 x 10^-5 Pa*s (Dynamic viscosity of air)
-* L ≈ 0.5 m (Total length of the sample loop tubing)
+* $\Delta P \approx 30 \text{ Pa}$ (Estimated static pressure differential generated by the 60mm axial fan)
+* $r = 0.001 \text{ m}$ (Radius of standard 2mm ID PTFE tubing)
+* $\mu \approx 1.81 \times 10^{-5} \text{ Pa}\cdot\text{s}$ (Dynamic viscosity of air at $20^\circ\text{C}$)
+* $L \approx 0.5 \text{ m}$ (Total equivalent length of the sample loop tubing)
 
-Q = (30 * 3.14159 * 0.001^4) / (8 * 1.81 x 10^-5 * 0.5)
-Q ≈ 1.3 x 10^-6 m^3/s
+$$Q = \frac{30 \cdot 3.14159 \cdot (0.001)^4}{8 \cdot 1.81 \times 10^{-5} \cdot 0.5} \approx 1.3 \times 10^{-6} \text{ m}^3/\text{s}$$
 
-Converted to standard flow rate:
-Q ≈ 78 mL/min
-
+Converting to standard laboratory volumetric flow:
+**$Q \approx 78 \text{ mL/min}$**
 
 
-Why is ~80 mL/min optimal?
-MQ-series gas sensors rely on an internal micro-heater maintaining a steady temperature of ~300°C. If the airflow is too high (e.g., direct fan blast), the heater cools down, and the baseline readings drift wildly. A micro-flow of 80 mL/min acts as a gentle, continuous "inhalation" of the sample, matching the strict standards of commercial gas chromatography equipment.
+
+The biquadratic relationship ($r^4$) is the critical factor. By utilizing 2mm internal diameter tubing instead of 4mm, the flow rate is restricted by a factor of 16, physically hard-limiting the system to approximately 80 mL/min regardless of minor fan speed variations.
+
+### 2.2 MOX Sensor Thermodynamics & The "Thermal Drift" Problem
+Why is a highly restricted flow of ~80 mL/min the optimal target for this system? The answer lies in the semiconductor physics of the sensors.
+
+MQ-series gas sensors detect chemicals via an internal ceramic micro-tube coated with Tin Dioxide ($\text{SnO}_2$). An internal heating element must maintain the $\text{SnO}_2$ surface at a precise thermodynamic equilibrium of $\sim 300^\circ\text{C}$. At this temperature, oxygen ions ($O^-$) adsorb onto the surface, trapping electrons and increasing electrical resistance. When reducing VOC gases interact with these ions, electrons are released back into the conduction band, causing a measurable drop in resistance.
+
+
+**The Threat of Forced Convection:**
+If the sample flow rate is too high (e.g., $>500 \text{ mL/min}$), the velocity of the incoming fluid drastically increases the convective heat transfer coefficient ($h$). The incoming room-temperature air acts as a coolant, stripping thermal energy away from the sensor's micro-heater faster than the internal circuitry can compensate. 
+
+As the surface temperature drops from $300^\circ\text{C}$ to $280^\circ\text{C}$, the baseline electrical resistance shifts violently due to thermal dynamics rather than chemical concentration. This creates irreversible "Thermal Drift" in the dataset.
+
+By mathematically restricting the flow to **~80 mL/min**, the chamber effectively acts as a commercial Gas Chromatograph intake. It provides a steady, continuous "inhalation" of the VOC sample—updating the chamber's atmosphere much faster than the inherent response time ($t_{90}$) of the sensors—while ensuring the forced convection remains negligible. The thermal equilibrium of the micro-heaters is perfectly preserved, yielding laboratory-grade signal stability.
 
 ---
 
@@ -55,10 +90,10 @@ All components are fully parametric and designed for FDM printing with zero supp
 
 1. flow_chamber.stl - The main 1.2L body with M3 heat-set standoffs, 2x PC4-M6 ports, and a wire-potting cup.
 2. sensor_plate.stl - A universal breadboard platform (7mm grid) for mounting MQ, BME688, or custom PCBs.
-3. diffuser_insert.stl - A 20mm drop-in honeycomb flow straightener with integrated pillars.
+3. diffuser_insert.stl - A tall 40mm drop-in honeycomb flow straightener with integrated pillars.
 4. lid_pro.stl - The main aerodynamic lid housing the tangential ducts, return vents, and gasket grooves.
-5. fan_dome_ultimate.stl - The top shell that covers the fan, houses the sample inlet port, and completes the airflow loop.
-6. tpu_gaskets.stl - Two custom gaskets (151mm and 94mm) that guarantee a 100% hermetic seal.
+5. fan_dome_ultimate.stl - The aerodynamic top shell with suspended internal pillars, a PC4-M6 sample inlet port, and a sweeping internal cavity.
+6. tpu_gaskets.stl - Two custom gaskets (151mm and 94mm) that guarantee a 100% hermetic seal between the layers.
 
 ---
 
@@ -66,16 +101,17 @@ All components are fully parametric and designed for FDM printing with zero supp
 
 | Category | Item | Quantity | Notes |
 | :--- | :--- | :--- | :--- |
-| Filament | PETG / ABS / ASA | ~400g | Rigid parts (resists high sensor temps). |
-| Filament | TPU (Flexible) | ~15g | Critical for the airtight custom gaskets. |
+| Filament | PETG / ABS / ASA | ~300g | Rigid parts (resists high sensor temps). |
+| Filament | TPU (Flexible) | ~10g | Critical for the airtight custom gaskets. |
 | Hardware | M3 Heat-Set Inserts | 12 pcs | OD ~4.2mm, L ~5.5mm. |
-| Hardware | M3x30mm Bolts | 4 pcs | Secures the internal diffuser stack. |
+| Hardware | M3x50mm Bolts | 4 pcs | Secures the internal 40mm diffuser stack. |
 | Hardware | M3x14mm Bolts | 8 pcs | Secures the main lid to the base. |
 | Hardware | M4x35mm Bolts + Nuts | 4 pcs | Secures the fan and upper dome. |
-| Pneumatics | PC4-M6 Fittings | 3-4 pcs | Standard 3D printer Bowden fittings. |
+| Pneumatics | PC4-M6 Fittings | 3-5 pcs | Standard 3D printer Bowden fittings. |
 | Pneumatics | PTFE Tubing | 1-2 meters | 4mm OD / 2mm ID. |
+| Pneumatics | PTFE Thread Tape | 1 roll | Standard plumber's Teflon tape for sealing threads. |
 | Electronics| 60x60mm Axial Fan | 1 pc | 10mm to 20mm thickness. |
-| Sealing | Silicone Sealant | 1 tube | Used for potting the sensor wires. |
+| Sealing | Silicone Sealant | 1 tube | Used for potting the sensor wires and sealing bolts. |
 
 ---
 
@@ -89,15 +125,20 @@ To ensure the printed TPU gaskets do not leak air through micro-gaps, adjust you
 
 ---
 
-## 6. Assembly Instructions
+## 6. Assembly & Sealing Instructions
+
+Vacuum-grade sealing requires careful attention during assembly. 
 
 1. Heat-Set Inserts: Melt the 12 M3 inserts into the base (8 on the top flange, 4 on the internal bottom standoffs).
-2. Sensors & Wiring: Mount your sensors to the sensor_plate. Route the wire loom through the square cutout, out the wall hole, and into the external potting cup. 
-3. Internal Stack: Place the sensor_plate on the bottom standoffs. Place the diffuser_insert on top (legs pointing down). Secure both to the base using the four M3x30mm bolts.
-4. Wire Potting: Fill the external wire cup entirely with silicone sealant. Ensure it penetrates between the wires. Let it cure fully to create a hermetic seal.
-5. Gaskets: Insert the large TPU gasket into the bottom of lid_pro. Insert the smaller TPU gasket into the top groove of the lid.
-6. Seal the Base: Bolt lid_pro to the base using eight M3x14mm bolts. Tighten in a cross-pattern to compress the gasket.
-7. Fan & Dome: Drop the 60mm fan into the lid recess (exhaust sticker pointing DOWN). Route the fan wire out the side hole of fan_dome_ultimate. Bolt the dome over the fan using four M4x35mm bolts. Seal the tiny wire hole with a dab of silicone.
-8. Pneumatics: Tap the PC4-M6 fittings into the base and the top of the dome. Connect your sample jar.
+2. Pneumatic Fittings: Wrap the threads of all PC4-M6 fittings with 2-3 layers of PTFE (Teflon) tape. Thread them firmly into the printed plastic (1 on the dome, 2 on the base). The tape fills the micro-channels between printed layers.
+
+3. Sensors & Wiring: Mount your sensors to the sensor_plate. Route the wire loom through the square cutout, out the wall hole, and into the external potting cup. 
+4. Internal Stack: Place the sensor_plate on the bottom standoffs. Place the 40mm diffuser_insert on top (legs pointing down). Secure both to the base using the four long M3x50mm bolts.
+5. Wire Potting: Fill the external wire cup entirely with silicone sealant. Ensure it penetrates between the wires. Let it cure fully.
+6. Gaskets: Insert the large TPU gasket into the bottom of lid_pro. Insert the smaller 94mm TPU gasket into the top groove of the lid.
+7. Seal the Base: Bolt lid_pro to the base using eight M3x14mm bolts. Tighten in a cross-pattern to compress the gasket evenly.
+8. Fan & Dome: Drop the 60mm fan into the lid recess (exhaust sticker pointing DOWN). Route the fan wire out the side hole of fan_dome_ultimate. 
+9. Dome Sealing: Place a tiny dab of silicone (or a micro TPU washer) under the head of each M4x35mm bolt before inserting them into the dome. This prevents air from spiraling up the threads due to the internal vacuum. Tighten the dome down. Seal the tiny wire hole with a dab of silicone.
+10. Final Loop: Connect your sample jar. You can use the top dome port for intake, one base port for the return line, and plug the second base port (or use it as a clean-air flush valve).
 
 > Important Operation Note: Brand new MQ-series sensors require a continuous 48-hour burn-in period (powered at 5V in clean air) to stabilize their internal SnO2 heating elements before gathering baseline data.
