@@ -66,8 +66,8 @@ All components are fully parametric and designed for FDM printing with zero supp
 
 | Category | Item | Quantity | Notes |
 | :--- | :--- | :--- | :--- |
-| Filament | PETG / ABS / ASA | ~300g | Rigid parts (resists high sensor temps). |
-| Filament | TPU (Flexible) | ~10g | Critical for the airtight custom gaskets. |
+| Filament | PETG / ABS / ASA | ~400g | Rigid parts (resists high sensor temps). |
+| Filament | TPU (Flexible) | ~15g | Critical for the airtight custom gaskets. |
 | Hardware | M3 Heat-Set Inserts | 12 pcs | OD ~4.2mm, L ~5.5mm. |
 | Hardware | M3x30mm Bolts | 4 pcs | Secures the internal diffuser stack. |
 | Hardware | M3x14mm Bolts | 8 pcs | Secures the main lid to the base. |
