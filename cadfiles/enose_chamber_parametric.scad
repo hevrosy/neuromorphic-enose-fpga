@@ -1,6 +1,6 @@
 // ============================================================================
 // PROJECT: Advanced E-Nose Fluidic Chamber
-// VERSION: 1.0.0 (Ultimate Aerodynamic Release)
+// VERSION: 1.0.1 (Ultimate Aerodynamic Release - FIXED AIRFLOW)
 // DESCRIPTION: A professional, 100% support-free FDM 3D printable chamber 
 //              for Electronic Nose (VOC) sensor arrays. Features a closed-loop 
 //              tangential vortex airflow, zero-leak TPU gaskets, and universal 
@@ -212,14 +212,14 @@ module lid_pro() {
 }
 
 // ----------------------------------------------------------------------------
-// COMPONENT 5: ULTIMATE FAN DOME
-// Features a PC4-M6 sample inlet, massive air plenum, and suspended pillars.
+// COMPONENT 5: ULTIMATE FAN DOME (FIXED: Aerodynamic "Sweeping Bell")
+// Features massive internal clearance and suspended pillars for max airflow.
 // ----------------------------------------------------------------------------
 module fan_dome_ultimate() { 
-    dh = 26; // Internal clearance height (Allows a 20mm thick fan to breathe easily)
+    dh = 26; // Internal clearance height
     th = 32; // Total height (Leaves a solid 6mm thick roof for the pneumatic thread)
-    wt = 3;  // Solid 3mm walls for durability
-    ow = 98; // Wide base flange perfectly covers the 94mm gasket
+    wt = 3;  // Solid 3mm walls
+    ow = 98; // Wide base flange perfectly covers the 94mm gasket and return vents
 
     difference() { 
         // 1. Aerodynamic Outer Shell
@@ -229,20 +229,24 @@ module fan_dome_ultimate() {
             translate([0, 0, th - 2]) rounded_box(56, 56, 2, 4); 
         } 
         
-        // 2. The Internal Plenum & Fan Cavity
-        union() {
-            // Base collection zone (Captures air returning from the 4 vents)
-            translate([0, 0, -0.1]) rounded_box(ow - 2*wt, ow - 2*wt, 4.2, 10 - wt);
+        // 2. The Internal Magic (Sweeping Void with Suspended Pillars)
+        difference() {
+            // THE MASSIVE VOID: Wide base tapering smoothly up to the fan intake.
+            // Provides maximum airflow around the fan body.
+            hull() {
+                translate([0, 0, -0.1]) rounded_box(ow - 2*wt, ow - 2*wt, 5, 8); // Wide capture zone (92mm)
+                translate([0, 0, 16]) rounded_box(68, 68, 0.1, 6); // Smooth taper
+                translate([0, 0, dh]) rounded_box(58, 58, 0.1, 4); // Fan intake area
+            }
             
-            // Precise square cavity for the 60x60mm fan body (up to Z=14.5)
-            translate([0, 0, 4]) rounded_box(62, 62, 10.5, 2);
-            
-            // Cylindrical upper plenum. 
-            // Using a cylinder leaves the 4 corners as SOLID plastic pillars for the screws to crush the fan frame!
-            translate([0, 0, 14.5]) cylinder(h=dh - 14.5, d=58);
+            // SUSPENDED PILLARS: These hang from the ceiling down to Z=14.5.
+            // They rest precisely on the fan frame corners, allowing max airflow around them.
+            for(x=[-fan_mount, fan_mount], y=[-fan_mount, fan_mount]) { 
+                translate([x, y, 14.5]) cylinder(h=dh, d=10); 
+            } 
         }
         
-        // 3. Fastener Holes & Countersinks 
+        // 3. Fastener Holes & Countersinks (Drilled through the solid pillars)
         for(x=[-fan_mount, fan_mount], y=[-fan_mount, fan_mount]) { 
             translate([x, y, -1]) cylinder(h=th + 5, d=4.2); 
             translate([x, y, th - 2.5]) cylinder(h=3, d1=4.2, d2=8.5); 
@@ -251,7 +255,7 @@ module fan_dome_ultimate() {
         // 4. Side Wire Port (Positioned at Z=17, safely above the fan blades)
         translate([0, -(ow/2), 17]) rotate([90, 0, 0]) cylinder(h=30, d=5, center=true); 
 
-        // 5. Top Pneumatic Port Inlet (For PC4-M6 fitting, draws VOC sample from jar)
+        // 5. Top Pneumatic Port Inlet (For PC4-M6 fitting, threading into the 6mm roof)
         translate([0, 0, dh - 1]) cylinder(h=10, d=5.4); 
     } 
 }
@@ -266,7 +270,7 @@ module tpu_gaskets() {
         rounded_box(151.4 - tol, 151.4 - tol, gasket_h, 20.7);
         translate([0, 0, -1]) rounded_box(144.6 + tol, 144.6 + tol, gasket_h + 2, 17.3);
     }
-    // Top Gasket (Fan Dome Seal)
+    // Top Gasket (Fan Dome Seal - 94mm)
     difference() {
         rounded_box(94 - tol, 94 - tol, gasket_h, 10);
         translate([0, 0, -1]) rounded_box(87.2 + tol, 87.2 + tol, gasket_h + 2, 6.6);
@@ -306,6 +310,7 @@ if (view_mode == "assembly") {
     color("LimeGreen")      translate([-180, 0, 0]) sensor_plate();
     color("DarkOrange")     translate([180, 0, 0]) diffuser_insert();
     color("LightSlateGray") translate([0, 180, 26]) rotate([180, 0, 0]) lid_pro();
+    // Fan dome is flipped upside down for support-free printing on its flat roof
     color("Beige")          translate([-180, 180, 32]) rotate([180, 0, 0]) fan_dome_ultimate();
     color("DeepSkyBlue")    translate([180, 180, 0]) tpu_gaskets();
 }
