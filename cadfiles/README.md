@@ -4,16 +4,6 @@ A professional-grade, 100% support-free, 3D-printable fluidic chamber designed s
 
 This project solves the most common issues found in DIY and academic electronic noses: poor gas mixing, lack of airtightness, aerodynamic stalling, and direct cold drafts disrupting the heated MQ-series gas sensors. By utilizing an aerospace-inspired "Closed-Loop Vortex System" and a 3D-printed dual-gasket sealing mechanism, this chamber ensures highly repeatable and stable sensor readings.
 
-
-
----
-
-# Advanced E-Nose Fluidic Chamber (v1.0.2)
-
-A professional-grade, 100% support-free, 3D-printable fluidic chamber designed specifically for Electronic Nose (E-Nose) applications and Volatile Organic Compound (VOC) analysis. 
-
-This project solves the most common issues found in DIY and academic electronic noses: poor gas mixing, lack of airtightness, aerodynamic stalling, and direct cold drafts disrupting the heated MQ-series gas sensors. By utilizing an aerospace-inspired "Closed-Loop Vortex System" and a 3D-printed dual-gasket sealing mechanism, this chamber ensures highly repeatable and stable sensor readings.
-
 ---
 
 ## 1. Concept & Scientific Justification: Overcoming Aerodynamic Limitations
