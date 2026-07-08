@@ -1,259 +1,944 @@
-# Пространствено-времево оптимизирана, двуконтурна флуидна камера за масиви от газови сензори (Електронен нос): Проектиране, Кинетика и Термодинамика
+# Advanced E-Nose Fluidic Chamber
+## Dual-Loop Parametric Measurement Chamber for Gas-Sensor Arrays
 
-**Архитектурна версия:** 1.2.4 (Напълно параметрична, Топологично оптимизирана за FDM)  
-**Хардуерна спецификация:** Sunon EE60201B1 (Двоен сачмен лагер, Високоскоростен аксиален ротор)  
-**Ключови думи:** Изкуствено обоняние, Механика на непрекъснатите среди, Ламинаризация, Термодинамика на хемисорбцията, Визкоеластично затихване, Дисперсия на Тейлър, Отворен хардуер (Open-Source DAQ).
-
-## 1. Въведение и Архитектурна Парадигма
-Системите за Изкуствено обоняние (Електронен нос), базирани на метало-оксидни полупроводници (Metal-Oxide Semiconductor - MOX), представляват мощен инструмент за неразрушителен анализ на летливи органични съединения (VOCs). Въпреки това, преходът от контролирана лабораторна среда към полеви условия или системи за събиране на данни (Data Acquisition - DAQ) за Машинно обучение (Machine Learning), разкрива критични хардуерни дефицити в конвенционалните дизайни. 
-
-Достоверността на извличаните данни (Signal-to-Noise Ratio - SNR) е фундаментално ограничена от три системни физични феномена, произтичащи от неадекватния дизайн на флуидните камери:
-1. **Стохастична макро-турбулентност (Аеродинамичен шум):** Хаотичното движение на въздушните маси над сензорната матрица създава локални флуктуации в парциалното налягане на аналита.
-2. **Неизотермични гранични условия (Термичен дрифт):** Нестабилните конвективни потоци нарушават прецизния топлинен баланс на сензорните микронагреватели, променяйки базовата им линия.
-3. **Микрофоничен и структурен резонанс:** Слабото механично декуплиране (изолиране) на активните помпени елементи индуцира електрически шум в чувствителните керамични субстрати на сензорите.
-
-Традиционните ортогонални (кутиеобразни) камери страдат от аеродинамични "мъртви зони" (Stagnation zones), където газовете стагнират, което води до забавено време за реакция, асиметрични криви на насищане и силно изразена дисперсия. Настоящият труд предлага и валидира детерминистично конструирана, двуконтурна флуидна архитектура. Използвайки една единствена активна турбомашина (индустриален аксиален вентилатор Sunon EE60201B1), системата генерира първичен принудителен вихър за бърза пространствена хомогенизация, докато пасивно управлява високорегулиран вторичен ламинарен микро-поток за екстракция на газовата проба. Архитектурата демократизира достъпа до високопрецизна аналитична апаратура, предоставяйки отворен, параметричен и икономически ефективен модел, съвместим с широк спектър от сензори.
+**Project:** Neuromorphic e-Nose on FPGA  
+**Repository section:** `cadfiles/`  
+**CAD model:** `enose_chamber_parametric.scad`  
+**Architecture version:** 1.2.4  
+**Target application:** Electronic-nose data acquisition, VOC sampling, gas-sensor array stabilization, and machine-learning dataset generation  
+**Primary manufacturing method:** FDM 3D printing  
+**Target fan:** Sunon EE60201B1 or mechanically compatible high-speed 60 mm axial fan  
 
 ---
 
-## 2. Системен импеданс и Аеродинамична Работна точка (Operating Point)
-За да се избегне използването на сложни, скъпи и изключително шумни мембранни помпи за вземане на проба, предложената система използва индустриален аксиален вентилатор като генератор на диференциално налягане ($\Delta P$). За да функционира вентилаторът като вакуумна помпа за вторичния кръг, вътрешното статично налягане в главния пленум трябва да бъде изкуствено повишено. Това обаче трябва да се осъществи без да се преминава критичната граница на аеродинамичен срив (Aerodynamic Stall) на роторните лопатки, при който въздушният поток се отлепва от аеродинамичния профил, водейки до нулев ефективен дебит и екстремни вибрации.
+## 1. Overview
 
+This directory contains the parametric CAD design for a custom fluidic measurement chamber developed as part of the **Neuromorphic e-Nose on FPGA** project. The chamber is designed for repeatable acquisition of gas-sensor time-series data from volatile organic compounds emitted by food samples or other analyte sources.
 
+The chamber is not a simple enclosure. It is a controlled fluidic interface between the physical sample, the gas-sensor array, and the data-acquisition pipeline. Its purpose is to reduce common sources of experimental variability in low-cost electronic-nose systems, including uncontrolled turbulence, stagnant zones, thermal drift, sensor-to-sensor exposure imbalance, vibration transfer, and adsorption memory effects.
 
-Интегрираната турбомашина Sunon EE60201B1 разполага с максимално статично налягане $P_{max} \approx 42\text{ Pa}$ и максимален дебит в свободна среда $Q_{max} \approx 650\text{ L/min}$. За прецизно калибриране на налягането, в изпускателния тракт на първичния кръг са интегрирани четири геометрични дросела с диаметър $6.5\text{ mm}$. Общата им геометрична площ на сечението ($A_{ex}$) е $1.327 \times 10^{-4} \text{ m}^2$.
-
-Според принципите на механиката на непрекъснатите среди, когато газ преминава през отвор с остър ръб (какъвто е топологичният профил на 3D-принтирания полимер), газовите струи се свиват непосредствено след отвора. Този феномен, известен като *Vena Contracta*, намалява ефективното сечение на потока. Затова се прилага емпиричен коефициент на изтичане $C_d = 0.62$. Кривата на системния импеданс ($P_{sys}$), описваща спада на налягането като функция от квадрата на дебита, се дефинира като:
-$$\Delta P = \frac{\rho}{2} \cdot \left(\frac{Q}{C_d \cdot A_{ex}}\right)^2$$
-
-Където $\rho$ е плътността на въздуха ($1.2\text{ kg/m}^3$), а $Q$ е обемният дебит. При наслагването (пресичането) на тази параболична крива на импеданса с P-Q (Pressure-Flow) характеристиката на вентилатора се установява реалната емпирична работна точка (Operating Point) на флуидната камера:
-**$\Delta P_{op} \approx 39 \text{ Pa}$**
-Тази стойност доказва, че системата използва над 90% от капацитета за статично налягане на турбомашината, поддържайки я в стабилен работен режим без риск от срив.
+The current CAD implementation is provided as a fully parametric OpenSCAD model. It includes the main flow chamber, sensor plate, honeycomb diffuser, aerodynamic lid, fan dome, TPU gaskets, fan-isolation elements, purge plug, vibration-damping washers, and shock-absorbing feet.
 
 ---
 
-## 3. Кинематика на първичния циклонен кръг (Пространствена Хомогенизация)
-Основната функция на първичния кръг е бързото, равномерно и повтаряемо смесване на газовия аналит с носещия газ (атмосферен въздух) в рамките на $1.2\text{ L}$ обем на основната камера.
+## 2. Design Motivation
 
-### 3.1 Детерминистичен вихър и трансфер на маса
-При установено постоянно работно налягане от $39\text{ Pa}$, скоростта на флуида ($v$), преминаващ през аеродинамичните дросели, се изчислява чрез уравнението на Бернули за несвиваем флуид по продължение на токова линия:
-$$v = \sqrt{\frac{2 \cdot \Delta P_{op}}{\rho}} = \sqrt{\frac{2 \cdot 39}{1.2}} \approx \mathbf{8.06 \text{ m/s}}$$
+Low-cost electronic-nose systems based on metal-oxide semiconductor gas sensors are highly sensitive to the geometry and dynamics of the measurement chamber. Even when the same sensors and electronics are used, the acquired data can vary significantly depending on airflow, sample position, chamber volume, temperature distribution, and residual contamination from previous measurements.
 
-Този вектор на скоростта генерира строго контролиран първичен обемен дебит ($Q_{int}$):
-$$Q_{int} = (C_d \cdot A_{ex}) \cdot v = (0.62 \cdot 1.327 \times 10^{-4}) \cdot 8.06 \approx 6.63 \times 10^{-4} \text{ m}^3/\text{s} \approx \mathbf{40 \text{ L/min}}$$
-Въздушните маси се инжектират в камерата тангенциално, индуцирайки принудителен вихър (Forced Vortex). За да се гарантира безпрепятствената работа на ротора и да се предотврати "задушаване" в горната част на камерата, вътрешната геометрия на купола е конструирана с широк аеродинамичен байпас (Wide-Body Aerodynamics), осигуряващ масивен 7-милиметров въздушен коридор около рамката на вентилатора. Непрекъснатият вътрешен циклон от $40\text{ L/min}$ гарантира, че целият физически обем на камерата се хомогенизира напълно **33 пъти в минута** ($\approx 0.55\text{ Hz}$), елиминирайки напълно локалните концентрационни градиенти.
+The chamber was designed to address the following problems:
 
-### 3.2 Ламинаризация чрез геометричен колиматор (Намаляване на $Re$)
-Въпреки че високоскоростният циклон осигурява превъзходен масообмен, неговата турбулентна кинетична енергия е пагубна за аналоговите сензори. Турбулентните вихри създават микро-флуктуации в локалното налягане върху сензорната повърхност. За преодоляване на този проблем, въздухът се пренасочва нагоре през $40\text{ mm}$ дълбок хексагонален дифузор (Honeycomb straightener), действащ като геометричен колиматор.
+1. **Poor gas mixing**  
+   Box-shaped chambers often create stagnant zones where analyte concentration changes slowly and non-uniformly.
 
+2. **Aerodynamic noise**  
+   Turbulent eddies near the sensor surface can create local pressure and concentration fluctuations that appear as noise in the sensor response.
 
+3. **Thermal drift**  
+   MQ-series sensors rely on heated metal-oxide surfaces. Excessive or unstable airflow can disturb the thermal equilibrium of the sensing layer and shift the baseline.
 
-Разделяйки макро-потока в множество микро-канали с малък хидравличен диаметър ($D_h \approx 3.5\text{ mm}$), вискозните сили (триенето в стените на каналите) започват да доминират над инерционните сили. Това се описва чрез числото на Рейнолдс ($Re$):
-$$Re = \frac{\rho \cdot v_{local} \cdot D_h}{\mu}$$
-Дизайнът математически потиска Рейнолдсовото число далеч под критичния преходен праг ($Re \le 2300$). Резултатът е трансформация на хаотичния циклон в строго ламинарен, успореден на сензорите профил на потока (Cross-flow sweep), осигуряващ безшумна среда за хемисорбция.
+4. **Sensor exposure imbalance**  
+   If the gas front reaches different sensors at different times or concentrations, the dataset may encode chamber artifacts rather than chemical information.
 
----
+5. **Memory effect**  
+   VOC molecules can adsorb to untreated 3D-printed polymer surfaces and desorb slowly in later runs, contaminating the baseline.
 
-## 4. Вторична транспортна кинетика и Управление на дисперсията
-Вторичният кръг осъществява транспорта на аналита от статичния съд за проби ($115\text{ ml}$ Headspace vial) до сензорния масив. Този процес протича напълно пасивно, задвижван от градиента на налягането ($\Delta P_{op} = 39\text{ Pa}$), генериран в херметичния купол.
+6. **Vibration coupling**  
+   Fan-induced vibration can be mechanically transferred to the sensor plate and wiring, increasing analog measurement noise.
 
-Транспортът се осъществява през химически инертна PTFE (политетрафлуороетилен) капилярна тръба с вътрешен радиус $r = 0.001\text{ m}$ и дължина $L = 0.4\text{ m}$. Кинетиката следва уравнението на Хаген-Поазьой за стационарен ламинарен поток в цилиндрични тръби:
-$$Q_{ext} = \frac{\Delta P_{op} \cdot \pi \cdot r^4}{8 \cdot \mu \cdot L}$$
-Приемайки динамичния вискозитет на въздуха за $\mu = 1.81 \times 10^{-5}\text{ Pa}\cdot\text{s}$:
-$$Q_{ext} = \frac{39 \cdot \pi \cdot (0.001)^4}{8 \cdot (1.81 \times 10^{-5}) \cdot 0.4} = 2.11 \times 10^{-6} \text{ m}^3/\text{s} \approx \mathbf{127 \text{ mL/min}}$$
-
-### 4.1 Дисперсия на Тейлър и Число на Пекле ($Pe$)
-Този прецизно дозиран дебит от $127\text{ mL/min}$ не е просто следствие, а математически търсен оптимум за целите на Машинното обучение. При движение на газ през тръба се наблюдава феноменът Дисперсия на Тейлър (Taylor-Aris dispersion) – надлъжно размиване на концентрационния фронт поради параболичния профил на скоростите. 
-
-За да се запази времевият профил на газовия фронт (остри криви на реакция), аксиалната конвекция трябва да доминира над надлъжната дифузия. Това съотношение се изразява чрез безразмерното число на Пекле ($Pe$). Дебитът от $127\text{ mL/min}$ гарантира достатъчно високо $Pe$, като същевременно екстрахира $115\text{ ml}$ обем на пробата за точно **54 секунди**. Това осигурява идеално разпределение на времето на престой (Residence Time Distribution - RTD), предоставяйки на алгоритмите за класификация ясни и диференцируеми времеви серии.
+The proposed design uses a dual-loop fluidic architecture to separate high-energy internal mixing from low-flow sample extraction and sensor exposure.
 
 ---
 
-## 5. Полупроводникова термодинамика и Квантови ефекти на хемисорбцията
-Метало-оксидните сензори (като широко разпространената MQ серия) детектират редуциращи газове чрез промяна в електрическата проводимост. В чист въздух, кислородните молекули се адсорбират върху кристалната решетка на калаения диоксид ($SnO_2$) и улавят електрони от проводимата зона, образувайки йони ($O^-$, $O^{2-}$). Това създава слой на електронно обедняване (Depletion layer), чиято дебелина се дефинира от Дебаевата дължина ($L_D$):
-$$L_D = \sqrt{\frac{\epsilon \cdot k_B \cdot T}{e^2 \cdot n_d}}$$
-Където $T$ е абсолютната температура, $k_B$ е константата на Болцман, а $n_d$ е концентрацията на донори. Както се вижда от уравнението, чувствителността е експоненциално и фундаментално зависима от поддържането на абсолютен изотермичен баланс на повърхността на микронагревателя (типично $T_s \approx 300^\circ\text{C}$).
+## 3. System-Level Role in the e-Nose Project
 
-Топлинните загуби към преминаващия носещ газ се описват от Закона на Нютон за конвективното охлаждане:
-$$q = h \cdot A \cdot (T_s - T_\infty)$$
-Ако системата допускаше хаотични скорости на засмукване или прекалено високи дебити (както се случва при използване на неограничени компютърни вентилатори), коефициентът на конвективен топлообмен ($h$) би флуктуирал неконтролируемо. Това би отнело топлинна енергия ($q$) по-бързо, отколкото PID регулаторът на микронагревателя може да компенсира. 
+The chamber is the physical front end of the full neuromorphic e-nose pipeline:
 
-Резултатът от това охлаждане е изместване на нивото на Ферми и промяна в енергията на активация за десорбция на кислородните йони, което външно се проявява като масивен **Термичен дрифт** на базовата линия. Строго калибрираният микро-дебит от $127\text{ mL/min}$ ефективно декуплира сензорната термодинамика от високоскоростния макро-циклон на първичния кръг, осигурявайки постоянна стойност на $h$ и кристално чиста, лишена от дрифт аналогова крива.
+```text
+Food or analyte sample
+        ↓
+Headspace vial / sample source
+        ↓
+Passive sample transport through PTFE tubing
+        ↓
+Fluidic chamber and gas-sensor array
+        ↓
+Raw sensor time-series acquisition
+        ↓
+Baseline correction and preprocessing
+        ↓
+Delta-based spike encoding
+        ↓
+SNN training and weight quantization
+        ↓
+FPGA SNN inference on PYNQ-Z2 / Zynq-7020
+```
 
----
-
-## 6. Визкоеластична изолация и Трибология на полимерите
-Механичните роторни вибрации от високоскоростната турбомашина (оперираща при $\sim 4500\text{ RPM}$) неизбежно се предават през твърдите полимерни структури (PETG/ABS). Тези вибрации индуцират структурен резонанс, който се прехвърля върху чувствителните керамични субстрати на MOX сензорите, генерирайки пиезоелектричен и микрофоничен електрически шум, който компрометира резолюцията на аналогово-цифровия преобразувател (ADC).
-
-За елиминиране на този вибрационен трансфер е конструирана модулна визкоеластична система на окачване, отпечатана от термопластичен полиуретан (TPU 95A). Системата функционира на базата на модела на Келвин-Фойгт за визкоеластичност, използвайки концепцията за **механичен импедансен конфликт (Mechanical Impedance Mismatch)**. 
-Материалът TPU 95A притежава висок модул на загубите (Loss modulus, $E''$), което му позволява да дисипира механичната енергия като минимално количество топлина. 
-
-* **Активно декуплиране:** Аксиалният вентилатор е поставен между две силно компресируеми TPU гарнитури. Това драстично намалява коравината ($k$) на системата, измествайки собствената резонансна честота ($f_n$) на сглобката в инфразвуковия спектър, далеч под възбуждащата работна честота на мотора.
-* **Аксиално затихване:** Специализирани TPU шайби са проектирани да абсорбират аксиалното напрежение, предавано чрез крепежните елементи (M3 болтове), прекъсвайки твърдите механични мостове.
-Изборът на вентилатор с двоен сачмен лагер (Sunon EE60201B1) елиминира гравитационното дебалансиране на ротора при хоризонтален монтаж, допълнително стабилизирайки системата.
-
----
-
-## 7. Химия на повърхностите, Адсорбционен хистерезис и Пасивация
-Адитивното производство чрез екструзия на материал (FDM 3D принтиране) неизбежно създава микропореста топология на повърхността (поради слоестата структура) и оставя полимери с висока повърхностна свободна енергия. 
-
-Когато се анализират комплексни газове (като феноли, катрани от цигарен дим или тежки алкохоли), вътрешните стени на суровата пластмасова камера действат като хроматографска стационарна фаза. Молекулите на аналита се задържат в микропорите чрез силите на Ван дер Ваалс и водородни връзки. Този феномен води до тежък **Адсорбционен хистерезис (Memory Effect)**. Според изотермите на сорбция на Лангмюир, повърхността се насища бавно и освобождава молекулите още по-бавно, което означава, че базовата линия на сензорите никога не се възстановява до истинската нула между отделните експерименти.
-
-**Задължителна научна пасивация:** За да се гарантира метрологична точност, вътрешната макро-геометрия на модулите `flow_chamber` и `lid_pro` задължително се пасивира. Нанасянето на тънък слой химически инертна епоксидна смола с ниска повърхностна енергия запълва всички микропори, минимизира повърхностната площ за адсорбция и изравнява сорбционните свойства на камерата с тези на лабораторното боросиликатно стъкло.
+The chamber is therefore not only a mechanical part. It is a dataset-quality component. Its design affects the signal-to-noise ratio, temporal repeatability, sensor drift, and reliability of the training data used by the spiking neural network.
 
 ---
 
-## 8. Дизайн за производство (DFM) и Протокол за динамично възстановяване
+## 4. Fluidic Architecture
 
-### 8.1 Топологична оптимизация
-Всеки детайл от архитектурата (Версия 1.2.4) е строго съобразен с кинематичните ограничения на FDM принтерите. 
-* **Изотропна 4.0 mm черупка:** Куполът (`fan_dome_ultimate`) е конструиран чрез сложни математически 3D отмествания, гарантиращи абсолютно равномерна дебелина на стените от 4.0 mm във всяка една точка. Това не само пести материал, но и осигурява термична стабилност по време на печат (особено при използване на Gyroid пълнеж), предотвратявайки вътрешни напрежения и изкривявания (Warping).
-* **Support-free конструкция:** Вътрешният аеродинамичен свод на купола е сключен под ъгъл от 45°, позволявайки безупречно принтиране без поддържащи структури, запазвайки вътрешния обем изцяло гладък за флуидния поток.
-* **Ергономична херметизация:** Изпускателният клапан (Purge Plug) е редизайниран с капковиден хоризонтален фланец (Teardrop tab), което позволява печат върху най-широката му страна, гарантирайки максимална адхезия към работната маса на принтера.
+The chamber uses a **dual-loop fluidic architecture**:
 
-### 8.2 Експоненциален разпад и Прочистване (Purge Protocol)
-За осигуряване на висока пропускателна способност (High Throughput) на лабораторната установка между дискретните експерименти, системата е оборудвана с $16\text{ mm}$ ръчен изпускателен клапан. 
+1. **Primary internal loop**  
+   A high-flow internal circulation loop driven by the axial fan. Its role is to rapidly homogenize the air volume inside the chamber.
 
-При премахване на TPU тапата, системният аеродинамичен импеданс колабира мигновено. Заобикаляйки тесните $6.5\text{ mm}$ дросели, турбомашината преминава в режим на свободен поток ($Q \to Q_{max}$). Приемайки консервативни 50% загуби на ефективност през новата отворена геометрия, дебитът на прочистване със стаен въздух достига $\approx 300\text{ L/min}$.
+2. **Secondary sampling loop**  
+   A low-flow passive extraction path that transports analyte from an external headspace vial into the chamber through PTFE tubing. Its role is to introduce the sample gas at a controlled rate without disturbing the thermal stability of the sensors.
 
-Концентрацията на остатъчния газ спада според закона за непрекъснатото разреждане (експоненциален разпад):
-$$C(t) = C_0 \cdot e^{-\left(\frac{Q_{purge}}{V}\right)t}$$
-За да се постигне пълна деконтаминация, стандартният протокол изисква 5-кратна подмяна на обема на камерата ($5 \times 1.2\text{ L} = 6.0\text{ L}$). Времето, необходимо за този процес, се изчислява като:
-$$t_{purge} = \frac{6.0\text{ L}}{300\text{ L/min}} \times 60 \approx \mathbf{1.2 \text{ секунди}}$$
-
-Тази иновативна функция позволява напълно изчистване на сензорния масив и абсолютно възстановяване на базовата линия за под 2 секунди. Това превръща представената отворена хардуерна платформа в безпрецедентно мощен, надежден и гъвкав аналитичен инструмент, полагащ основите за следващото поколение изследвания в сферата на Изкуствения интелект и детекцията на околната среда.
-
-# Advanced E-Nose Fluidic Chamber (v1.0.2)
-
-A professional-grade, 100% support-free, 3D-printable fluidic chamber designed specifically for Electronic Nose (E-Nose) applications and Volatile Organic Compound (VOC) analysis. 
-
-This project solves the most common issues found in DIY and academic electronic noses: poor gas mixing, lack of airtightness, aerodynamic stalling, and direct cold drafts disrupting the heated MQ-series gas sensors. By utilizing an aerospace-inspired "Closed-Loop Vortex System" and a 3D-printed dual-gasket sealing mechanism, this chamber ensures highly repeatable and stable sensor readings.
+This separation allows the chamber to combine fast mixing with gentle sensor exposure.
 
 ---
 
-## 1. Concept & Scientific Justification: Overcoming Aerodynamic Limitations
+## 5. Primary Loop: Internal Mixing and Homogenization
 
-Traditional E-Nose chambers often suffer from fatal flaws in fluid management, the most prominent being the "Closed Bottle Syndrome" (Aerodynamic Stall) and boundary layer stagnation.
+The primary loop is generated by a high-speed axial fan mounted in the upper section of the chamber. Instead of blowing directly onto the sensor array, the fan output is routed through tangential ducts integrated into the aerodynamic lid.
 
-### 1.1 The Aerodynamic Stall Problem
-Axial fans are engineered to move large volumes of air under low static pressure. Every fan operates on a specific Pressure-Volume (P-Q) performance curve. If an axial fan blows directly into a sealed chamber, the internal static pressure almost instantly equals the fan's maximum shut-off pressure ($P_{max}$). 
-When this equilibrium is reached, the flow rate ($Q$) drops to zero. The fan blades experience severe flow separation (stall), meaning they merely spin in their own localized turbulence without inducing any bulk fluid motion.
+These tangential ducts inject air along the chamber walls, producing a controlled cyclonic flow. The purpose of this flow is to homogenize the chamber volume and reduce concentration gradients.
 
+The design model assumes:
 
-### 1.2 The Closed-Loop Tangential Vortex
-To prevent stall and ensure continuous gas mixing, this chamber completely isolates the high-volume internal mixing loop from the low-volume external sampling loop. 
-Rather than forcing air downwards, the aerodynamic lid (`lid_pro`) routes the fan's output through four curved, constricting ducts. These ducts act as nozzles, accelerating the fluid and injecting it tangentially along the cylindrical walls of the chamber. 
+| Parameter | Design Estimate |
+|---|---:|
+| Main chamber volume | approximately 1.2 L |
+| Operating pressure differential | approximately 39 Pa |
+| Engineered choke diameter | 6.5 mm |
+| Primary internal flow estimate | approximately 40 L/min |
+| Approximate chamber volume exchanges | approximately 33 per minute |
 
-This generates a high-speed peripheral cyclone. The resulting centrifugal forces and high shear rates ensure that molecules of varying molecular weights (different VOCs) are violently and homogeneously mixed with the carrier air in milliseconds.
-
-
-### 1.3 Transition to Laminar Flow via Honeycomb Straightening
-Metal Oxide Semiconductor (MOX) gas sensors are highly sensitive to turbulent airflow. High-frequency turbulent eddies cause localized pressure and temperature micro-fluctuations on the sensor surface, which manifest as severe baseline noise in the analog signal.
-
-To solve this, the turbulent vortex is forced through a 40mm deep honeycomb diffuser grid. By passing the fluid through dozens of narrow, parallel channels, the characteristic length of the flow path is drastically reduced. This mathematically forces the Reynolds number ($Re$) down, dampening transverse velocity components and converting the turbulent cyclone into a calm, uniform, downward laminar breeze.
-
-
-### 1.4 Pressure Equalization (The Return Vents)
-After the laminar flow passes over the sensor array, the fluid is drawn back up through four 8mm vertical vents directly into the low-pressure zone (the dome) above the fan. This creates an infinite, perfectly balanced internal mixing loop, allowing the fan to operate at its peak efficiency point on the P-Q curve without breaching the chamber's hermetic seal.
+These values are analytical design estimates derived from the geometry and simplified fluid-dynamic assumptions. They should be experimentally verified using flow or pressure measurements if used as final metrological data.
 
 ---
 
-## 2. Flow Rate, Fluid Dynamics & Sensor Thermodynamics
+## 6. Honeycomb Diffuser and Flow Laminarization
 
-With the internal mixing loop running independently at high capacity ($\sim 100-150 \text{ L/min}$), the system can be utilized as a passive, high-precision vacuum pump to draw the external VOC sample.
+Although the primary vortex improves mixing, turbulent flow directly over metal-oxide sensors is undesirable. The chamber therefore includes a **40 mm honeycomb diffuser insert**. The diffuser acts as a geometric flow straightener.
 
-### 2.1 The Mathematics of the Sample Loop
-The fan creates a localized low-pressure zone (suction) inside the top dome and a high-pressure zone (discharge) in the main chamber. When connected to an external sample jar, this $\Delta P$ drives the fluid exchange.
+Its purpose is to:
 
-The sampling rate is strictly governed by the PTFE (Teflon) tubing acting as a flow restrictor. We calculate the theoretical flow rate using the Hagen-Poiseuille equation for fully developed, steady, incompressible, and laminar flow in a circular pipe:
+- break the large-scale vortex into many small parallel channels;
+- suppress transverse velocity components;
+- reduce local turbulence near the sensing surface;
+- produce a more uniform cross-flow over the sensor plate;
+- improve the repeatability of the transient response.
 
-$$Q = \frac{\Delta P \cdot \pi \cdot r^4}{8 \cdot \mu \cdot L}$$
-
-Where:
-* $\Delta P \approx 30 \text{ Pa}$ (Estimated static pressure differential generated by the 60mm axial fan)
-* $r = 0.001 \text{ m}$ (Radius of standard 2mm ID PTFE tubing)
-* $\mu \approx 1.81 \times 10^{-5} \text{ Pa}\cdot\text{s}$ (Dynamic viscosity of air at $20^\circ\text{C}$)
-* $L \approx 0.5 \text{ m}$ (Total equivalent length of the sample loop tubing)
-
-$$Q = \frac{30 \cdot 3.14159 \cdot (0.001)^4}{8 \cdot 1.81 \times 10^{-5} \cdot 0.5} \approx 1.3 \times 10^{-6} \text{ m}^3/\text{s}$$
-
-Converting to standard laboratory volumetric flow:
-**$Q \approx 78 \text{ mL/min}$**
-
-
-
-The biquadratic relationship ($r^4$) is the critical factor. By utilizing 2mm internal diameter tubing instead of 4mm, the flow rate is restricted by a factor of 16, physically hard-limiting the system to approximately 80 mL/min regardless of minor fan speed variations.
-
-### 2.2 MOX Sensor Thermodynamics & The "Thermal Drift" Problem
-Why is a highly restricted flow of ~80 mL/min the optimal target for this system? The answer lies in the semiconductor physics of the sensors.
-
-MQ-series gas sensors detect chemicals via an internal ceramic micro-tube coated with Tin Dioxide ($\text{SnO}_2$). An internal heating element must maintain the $\text{SnO}_2$ surface at a precise thermodynamic equilibrium of $\sim 300^\circ\text{C}$. At this temperature, oxygen ions ($O^-$) adsorb onto the surface, trapping electrons and increasing electrical resistance. When reducing VOC gases interact with these ions, electrons are released back into the conduction band, causing a measurable drop in resistance.
-
-
-**The Threat of Forced Convection:**
-If the sample flow rate is too high (e.g., $>500 \text{ mL/min}$), the velocity of the incoming fluid drastically increases the convective heat transfer coefficient ($h$). The incoming room-temperature air acts as a coolant, stripping thermal energy away from the sensor's micro-heater faster than the internal circuitry can compensate. 
-
-As the surface temperature drops from $300^\circ\text{C}$ to $280^\circ\text{C}$, the baseline electrical resistance shifts violently due to thermal dynamics rather than chemical concentration. This creates irreversible "Thermal Drift" in the dataset.
-
-By mathematically restricting the flow to **~80 mL/min**, the chamber effectively acts as a commercial Gas Chromatograph intake. It provides a steady, continuous "inhalation" of the VOC sample—updating the chamber's atmosphere much faster than the inherent response time ($t_{90}$) of the sensors—while ensuring the forced convection remains negligible. The thermal equilibrium of the micro-heaters is perfectly preserved, yielding laboratory-grade signal stability.
+The OpenSCAD model implements this diffuser as a drop-in honeycomb structure with integrated mounting pillars. The honeycomb geometry is intended to reduce the effective hydraulic diameter of the flow paths and promote more stable flow conditions before the gas reaches the sensors.
 
 ---
 
-## 3. Component Overview
+## 7. Secondary Loop: Passive Sample Extraction
 
-All components are fully parametric and designed for FDM printing with zero support structures.
+The secondary loop transports analyte from an external headspace vial to the chamber through a chemically inert PTFE tube. This avoids placing the food sample directly on the sensor plate and makes the measurement more repeatable.
 
-1. flow_chamber.stl - The main 1.2L body with M3 heat-set standoffs, 2x PC4-M6 ports, and a wire-potting cup.
-2. sensor_plate.stl - A universal breadboard platform (7mm grid) for mounting MQ, BME688, or custom PCBs.
-3. diffuser_insert.stl - A tall 40mm drop-in honeycomb flow straightener with integrated pillars.
-4. lid_pro.stl - The main aerodynamic lid housing the tangential ducts, return vents, and gasket grooves.
-5. fan_dome_ultimate.stl - The aerodynamic top shell with suspended internal pillars, a PC4-M6 sample inlet port, and a sweeping internal cavity.
-6. tpu_gaskets.stl - Two custom gaskets (151mm and 94mm) that guarantee a 100% hermetic seal between the layers.
+The current design documentation assumes:
+
+| Parameter | Design Value |
+|---|---:|
+| Headspace vial volume | approximately 115 mL |
+| PTFE tube internal radius | 1 mm |
+| PTFE tube length | approximately 0.4 m |
+| Driving pressure differential | approximately 39 Pa |
+| Estimated sampling flow | approximately 127 mL/min |
+| Approximate vial exchange time | approximately 54 s |
+
+The sampling flow is estimated using the Hagen–Poiseuille equation for laminar flow in a cylindrical tube:
+
+\[
+Q = \frac{\Delta P \cdot \pi r^4}{8 \mu L}
+\]
+
+where \(\Delta P\) is the pressure differential, \(r\) is the tube radius, \(\mu\) is the dynamic viscosity of air, and \(L\) is the tube length.
+
+A key design feature is the fourth-power dependence on tube radius. Small changes in tube diameter can strongly affect the sampling flow. For this reason, the tubing diameter and length should be kept fixed between experiments.
 
 ---
 
-## 4. Bill of Materials (BOM)
+## 8. Sensor Thermodynamics
+
+MQ-series gas sensors use heated metal-oxide surfaces, commonly based on tin dioxide. Their response depends on surface reactions between adsorbed oxygen species and reducing gases. The heater temperature strongly affects adsorption, desorption, surface conductivity, and baseline resistance.
+
+A major risk in electronic-nose chambers is convective cooling of the sensor surface. If the gas flow over the sensing layer is too strong or unstable, the sensor baseline may shift because of thermal effects rather than analyte concentration.
+
+The chamber therefore separates the high-flow mixing loop from the low-flow sample-exposure loop. The primary loop homogenizes the chamber, while the secondary loop introduces sample gas at a restricted flow rate. This helps reduce thermal disturbance of the sensor micro-heaters.
+
+---
+
+## 9. Vibration Isolation
+
+The design includes several TPU-based viscoelastic elements:
+
+- lid gaskets;
+- fan isolation gasket;
+- fan suspension gasket;
+- TPU washers;
+- shock-absorbing base feet;
+- purge plug.
+
+These components serve two purposes:
+
+1. **Airtight sealing**  
+   TPU gaskets improve hermetic sealing between printed rigid parts.
+
+2. **Mechanical decoupling**  
+   TPU elements reduce vibration transfer from the fan to the chamber body and sensor plate.
+
+This is important because mechanical vibration can couple into wiring, sensor boards, connectors, and analog front-end electronics.
+
+---
+
+## 10. Surface Passivation and Memory Effect
+
+FDM-printed polymer surfaces are not ideal analytical surfaces. They may contain layer lines, pores, roughness, and chemically active sites. VOC molecules can adsorb to these surfaces and slowly desorb during later measurements, creating a memory effect.
+
+For scientific experiments, the inner surfaces of the chamber should be passivated. A thin layer of chemically resistant, low-outgassing, low-surface-energy coating can reduce adsorption and improve recovery between runs.
+
+Recommended passivation targets:
+
+- internal wall of the main flow chamber;
+- internal lid surfaces;
+- sample gas pathway;
+- surfaces exposed to analyte-rich gas.
+
+The passivation process should be documented in the experimental protocol because it directly affects dataset repeatability.
+
+---
+
+## 11. Purge Protocol
+
+The chamber includes a purge feature that allows rapid removal of residual analyte between experiments. The purge plug can be opened to reduce the aerodynamic impedance and allow high-flow flushing with room air.
+
+A purge cycle is required between measurement runs to:
+
+- remove residual VOCs;
+- restore the sensor baseline;
+- reduce cross-contamination;
+- improve repeatability;
+- avoid temporal leakage between sample classes.
+
+A conservative measurement protocol should include a fixed purge duration, even if the analytical estimate suggests fast volume exchange.
+
+Recommended practical purge procedure:
+
+```text
+1. Remove or isolate the previous sample.
+2. Open the purge path.
+3. Run the fan for a fixed purge duration.
+4. Monitor sensor baseline recovery.
+5. Start the next run only after the baseline stabilizes.
+```
+
+For publication-quality experiments, the purge time should be determined experimentally from baseline recovery curves rather than only from theoretical airflow estimates.
+
+---
+
+## 12. CAD Model Structure
+
+The file `enose_chamber_parametric.scad` contains the full parametric chamber model.
+
+The OpenSCAD model supports several rendering and export modes through the `view_mode` parameter:
+
+```scad
+view_mode = "print_layout";
+```
+
+Available modes:
+
+| Mode | Description |
+|---|---|
+| `assembly` | Full exploded assembly view |
+| `print_layout` | All parts arranged on the build plate |
+| `part_base` | Export the main flow chamber base |
+| `part_plate` | Export the universal sensor plate |
+| `part_diffuser` | Export the honeycomb diffuser |
+| `part_lid` | Export the aerodynamic lid |
+| `part_dome` | Export the wide-body fan dome |
+| `tpu_lid_gaskets` | Export main TPU sealing gaskets |
+| `tpu_purge_plug` | Export the ergonomic purge plug |
+| `tpu_fan_gasket` | Export the fan isolation gasket |
+| `tpu_washers` | Export TPU dome bolt washers |
+| `tpu_feet` | Export shock-absorbing base feet |
+
+---
+
+## 13. Main Printed Components
+
+| Component | Function | Suggested Material |
+|---|---|---|
+| `flow_chamber` | Main 1.2 L chamber body with ports and standoffs | PETG / ABS / ASA |
+| `sensor_plate` | Universal perforated plate for sensor mounting | PETG / ABS / ASA |
+| `diffuser_insert` | 40 mm honeycomb flow straightener | PETG / ABS / ASA |
+| `lid_pro` | Aerodynamic lid with tangential ducts and gasket grooves | PETG / ABS / ASA |
+| `fan_dome_ultimate` | Wide-body fan dome with bypass cavity | PETG / ABS / ASA |
+| `tpu_lid_gaskets` | Main airtight gaskets | TPU 95A |
+| `tpu_purge_plug` | Manual purge valve plug | TPU 95A |
+| `tpu_fan_gasket` | Fan vibration isolation gasket | TPU 95A |
+| `tpu_washers` | Dome bolt vibration washers | TPU 95A |
+| `tpu_feet` | Shock-absorbing chamber feet | TPU 95A |
+
+---
+
+## 14. Key Parametric Dimensions
+
+The current OpenSCAD model uses the following main parameters:
+
+| Parameter | Value | Description |
+|---|---:|---|
+| `fc_w` | 144 mm | Outer base width |
+| `fc_l` | 144 mm | Outer base length |
+| `fc_h` | 60 mm | Internal height of primary air column |
+| `fc_r` | 15 mm | Outer corner radius |
+| `wall_t` | 4.0 mm | Wall thickness |
+| `bot_t` | 4.0 mm | Base floor thickness |
+| `sp_mount_xy` | 100 mm | Sensor plate mounting hole spacing |
+| `fan_size` | 62 mm | Fan footprint with tolerance |
+| `fan_hole` | 58 mm | Active fan intake diameter |
+| `fan_mount` | 25 mm | Fan mounting hole offset |
+| `fan_thickness` | 20 mm | Target fan thickness |
+| `tpu_t` | 1.2 mm | Fan isolation gasket thickness |
+| `gasket_h` | 3.2 mm | Main gasket groove depth |
+| `tol` | 0.2 mm | General print clearance tolerance |
+
+These parameters can be modified to adapt the chamber to other fans, sensor plates, or manufacturing tolerances.
+
+---
+
+## 15. Manufacturing Recommendations
+
+Recommended rigid materials:
+
+- PETG;
+- ABS;
+- ASA.
+
+Recommended flexible material:
+
+- TPU 95A for gaskets, isolation washers, plug, and feet.
+
+General printing recommendations:
+
+| Parameter | Recommendation |
+|---|---|
+| Layer height | 0.16–0.24 mm |
+| Perimeters | 4 or more |
+| Infill | 25–40%, gyroid or cubic |
+| Top/bottom layers | 5 or more |
+| Rigid parts | PETG / ABS / ASA |
+| Gaskets | TPU 95A |
+| Supports | Designed to be support-free where possible |
+
+For gas-sensing experiments, airtightness is more important than visual surface quality. Increase wall count if needed.
+
+---
+
+## 16. Bill of Materials
 
 | Category | Item | Quantity | Notes |
-| :--- | :--- | :--- | :--- |
-| Filament | PETG / ABS / ASA | ~300g | Rigid parts (resists high sensor temps). |
-| Filament | TPU (Flexible) | ~10g | Critical for the airtight custom gaskets. |
-| Hardware | M3 Heat-Set Inserts | 12 pcs | OD ~4.2mm, L ~5.5mm. |
-| Hardware | M3x50mm Bolts | 4 pcs | Secures the internal 40mm diffuser stack. |
-| Hardware | M3x14mm Bolts | 8 pcs | Secures the main lid to the base. |
-| Hardware | M4x35mm Bolts + Nuts | 4 pcs | Secures the fan and upper dome. |
-| Pneumatics | PC4-M6 Fittings | 3-5 pcs | Standard 3D printer Bowden fittings. |
-| Pneumatics | PTFE Tubing | 1-2 meters | 4mm OD / 2mm ID. |
-| Pneumatics | PTFE Thread Tape | 1 roll | Standard plumber's Teflon tape for sealing threads. |
-| Electronics| 60x60mm Axial Fan | 1 pc | 10mm to 20mm thickness. |
-| Sealing | Silicone Sealant | 1 tube | Used for potting the sensor wires and sealing bolts. |
+|---|---|---:|---|
+| Filament | PETG / ABS / ASA | approximately 300 g | Rigid parts |
+| Filament | TPU 95A | approximately 10–20 g | Gaskets, washers, plug, feet |
+| Fan | Sunon EE60201B1 or compatible 60 mm fan | 1 | High-speed axial fan |
+| Inserts | M3 heat-set inserts | 12 pcs | For repeated assembly |
+| Bolts | M3 bolts | as required | Lid, dome, diffuser mounting |
+| Pneumatic fittings | PC4-M6 or compatible | 1–2 pcs | Sample tubing connection |
+| Tubing | PTFE tube, 2 mm ID | approximately 0.4–0.5 m | Sample transport |
+| Sealant/coating | Low-outgassing epoxy or compatible coating | as required | Surface passivation |
 
 ---
 
-## 5. Crucial Print Settings (TPU Gaskets)
+## 17. Assembly Overview
 
-To ensure the printed TPU gaskets do not leak air through micro-gaps, adjust your slicer settings as follows:
-* Flow/Extrusion Multiplier: 106% - 108% (Over-extrusion seals the layers).
-* Wall Loops/Perimeters: 5 or 6 (The gasket must be 100% solid walls).
-* Top/Bottom Pattern: Concentric (Crucial! Do not use zig-zag/lines).
-* Print Speed: 20 mm/s.
+Recommended assembly sequence:
+
+```text
+1. Print rigid parts from PETG, ABS, or ASA.
+2. Print TPU gaskets, fan gasket, washers, purge plug, and feet.
+3. Install M3 heat-set inserts in the base and lid.
+4. Mount the sensor plate inside the chamber.
+5. Install the honeycomb diffuser above the sensor region.
+6. Install the lid gasket and mount the aerodynamic lid.
+7. Mount the fan between TPU isolation gaskets.
+8. Install the fan dome and TPU washers.
+9. Install PTFE tubing and pneumatic fittings.
+10. Seal and passivate internal analyte-exposed surfaces if required.
+11. Perform leak testing and purge testing.
+12. Run baseline stability tests before collecting datasets.
+```
 
 ---
 
-## 6. Assembly & Sealing Instructions
+## 18. Experimental Use
 
-Vacuum-grade sealing requires careful attention during assembly. 
+A recommended measurement run includes:
 
-1. Heat-Set Inserts: Melt the 12 M3 inserts into the base (8 on the top flange, 4 on the internal bottom standoffs).
-2. Pneumatic Fittings: Wrap the threads of all PC4-M6 fittings with 2-3 layers of PTFE (Teflon) tape. Thread them firmly into the printed plastic (1 on the dome, 2 on the base). The tape fills the micro-channels between printed layers.
+```text
+1. Chamber purge
+2. Baseline acquisition
+3. Sample connection or sample exposure
+4. Stabilization interval
+5. Active recording interval
+6. Sample removal
+7. Post-run purge
+8. Baseline recovery check
+```
 
-3. Sensors & Wiring: Mount your sensors to the sensor_plate. Route the wire loom through the square cutout, out the wall hole, and into the external potting cup. 
-4. Internal Stack: Place the sensor_plate on the bottom standoffs. Place the 40mm diffuser_insert on top (legs pointing down). Secure both to the base using the four long M3x50mm bolts.
-5. Wire Potting: Fill the external wire cup entirely with silicone sealant. Ensure it penetrates between the wires. Let it cure fully.
-6. Gaskets: Insert the large TPU gasket into the bottom of lid_pro. Insert the smaller 94mm TPU gasket into the top groove of the lid.
-7. Seal the Base: Bolt lid_pro to the base using eight M3x14mm bolts. Tighten in a cross-pattern to compress the gasket evenly.
-8. Fan & Dome: Drop the 60mm fan into the lid recess (exhaust sticker pointing DOWN). Route the fan wire out the side hole of fan_dome_ultimate. 
-9. Dome Sealing: Place a tiny dab of silicone (or a micro TPU washer) under the head of each M4x35mm bolt before inserting them into the dome. This prevents air from spiraling up the threads due to the internal vacuum. Tighten the dome down. Seal the tiny wire hole with a dab of silicone.
-10. Final Loop: Connect your sample jar. You can use the top dome port for intake, one base port for the return line, and plug the second base port (or use it as a clean-air flush valve).
+Recommended metadata for each run:
 
-> Important Operation Note: Brand new MQ-series sensors require a continuous 48-hour burn-in period (powered at 5V in clean air) to stabilize their internal SnO2 heating elements before gathering baseline data.
+| Field | Description |
+|---|---|
+| `Run_ID` | Unique measurement run identifier |
+| `Batch_ID` | Sample batch identifier |
+| `Product` | Food or analyte type |
+| `True_Class` | Experimental label, e.g. Fresh / Warning / Spoiled |
+| `Timestamp` | Acquisition time |
+| `Temperature` | Chamber or ambient temperature |
+| `Humidity` | Relative humidity |
+| `Purge_Time` | Purge duration before run |
+| `Baseline_Duration` | Baseline acquisition duration |
+| `Recording_Duration` | Active measurement duration |
+| `Notes` | Experimental observations |
+
+---
+
+## 19. Integration With the Neuromorphic FPGA Pipeline
+
+The chamber provides the physical data source for the full neuromorphic pipeline:
+
+```text
+Chamber measurement
+        ↓
+Raw sensor values
+        ↓
+Baseline-corrected values
+        ↓
+Temporal delta extraction
+        ↓
+Positive and negative spike channels
+        ↓
+12-bit spike masks
+        ↓
+SNN training dataset
+        ↓
+Quantized weights
+        ↓
+FPGA SNN inference
+```
+
+This makes the chamber an essential part of the system, not only an accessory. Any changes to chamber geometry, tubing length, fan speed, purge procedure, or surface coating may change the dataset distribution and should be documented.
+
+---
+
+## 20. Scientific Notes and Limitations
+
+The current chamber design is based on analytical fluid-dynamic reasoning and parametric CAD implementation. The reported pressure, flow, and exchange-time values should be interpreted as design estimates unless independently measured.
+
+Recommended validation steps:
+
+- measure actual pressure differential;
+- measure sample loop flow rate;
+- measure purge recovery time;
+- record baseline stability over time;
+- compare sensor response with and without fan vibration isolation;
+- evaluate repeatability across multiple runs;
+- evaluate adsorption memory before and after surface passivation.
+
+---
+
+## 21. Future Improvements
+
+Planned or recommended future work:
+
+- experimental airflow validation;
+- pressure sensor integration;
+- flow sensor integration;
+- controlled fan-speed PWM mode;
+- replaceable sample vial adapter;
+- improved surface passivation protocol;
+- temperature-stabilized chamber version;
+- CFD simulation of the primary and secondary loops;
+- comparison between vortex-only and diffuser-assisted operation;
+- full dataset-quality study using real food samples.
+
+---
+
+## 22. Citation
+
+If you use this chamber design in academic or research work, please cite the repository:
+
+```bibtex
+@misc{neuromorphic_enose_chamber,
+  author = {H. Vrosy},
+  title = {Advanced E-Nose Fluidic Chamber for Neuromorphic e-Nose on FPGA},
+  year = {2026},
+  howpublished = {GitHub repository},
+  note = {Parametric dual-loop fluidic chamber for gas-sensor arrays and electronic-nose data acquisition}
+}
+```
+
+---
+
+# Българска версия
+
+---
+
+## 1. Общо описание
+
+Тази директория съдържа параметричния CAD дизайн на специализирана флуидна измервателна камера, разработена като част от проекта **Neuromorphic e-Nose on FPGA**. Камерата е предназначена за повтаряемо събиране на времеви редове от газови сензори при измерване на летливи органични съединения, отделяни от хранителни проби или други източници на аналит.
+
+Камерата не е просто механична кутия. Тя представлява контролиран флуиден интерфейс между физическата проба, масива от газови сензори и pipeline-а за събиране на данни. Целта ѝ е да намали основните източници на експериментална неопределеност в нискобюджетни електронни носове: неконтролирана турбулентност, мъртви зони, термичен дрейф, неравномерно излагане на сензорите, пренос на вибрации и адсорбционен memory effect.
+
+Текущата CAD реализация е предоставена като напълно параметричен OpenSCAD модел. Той включва основна флуидна камера, сензорна плоча, honeycomb дифузор, аеродинамичен капак, купол за вентилатор, TPU гарнитури, елементи за виброизолация на вентилатора, purge тапа, вибрационни шайби и омекотяващи крачета.
+
+---
+
+## 2. Мотивация на дизайна
+
+Електронните носове, базирани на метал-оксидни газови сензори, са силно чувствителни към геометрията и динамиката на измервателната камера. Дори при използване на едни и същи сензори и електроника, събраните данни могат да се различават значително в зависимост от въздушния поток, позицията на пробата, обема на камерата, температурното разпределение и остатъчното замърсяване от предишни измервания.
+
+Камерата е проектирана да адресира следните проблеми:
+
+1. **Лошо смесване на газовете**  
+   Кутиеобразните камери често създават застойни зони, в които концентрацията на аналита се изменя бавно и неравномерно.
+
+2. **Аеродинамичен шум**  
+   Турбулентни вихри около повърхността на сензорите могат да създават локални флуктуации на налягането и концентрацията, които се проявяват като шум в сензорния отговор.
+
+3. **Термичен дрейф**  
+   MQ сензорите работят чрез нагрети метал-оксидни повърхности. Прекалено силен или нестабилен въздушен поток може да наруши термичното равновесие и да измести baseline-а.
+
+4. **Неравномерно излагане на сензорите**  
+   Ако газовият фронт достига различните сензори по различно време или с различна концентрация, dataset-ът може да кодира артефакти от камерата вместо химична информация.
+
+5. **Memory effect**  
+   VOC молекули могат да се адсорбират по необработени 3D-принтирани полимерни повърхности и да се освобождават бавно при следващи измервания.
+
+6. **Пренос на вибрации**  
+   Вибрациите от вентилатора могат механично да се предадат към сензорната плоча и окабеляването, увеличавайки аналоговия шум.
+
+Предложеният дизайн използва двуконтурна флуидна архитектура, която разделя високоенергийното вътрешно смесване от нискодебитната екстракция на пробата и излагането на сензорите.
+
+---
+
+## 3. Роля в цялостния e-Nose проект
+
+Камерата е физическият входен слой на пълния невроморфен e-nose pipeline:
+
+```text
+Хранителна или аналитна проба
+        ↓
+Headspace vial / съд за проба
+        ↓
+Пасивен транспорт през PTFE тръба
+        ↓
+Флуидна камера и газов сензорен масив
+        ↓
+Събиране на сурови сензорни времеви редове
+        ↓
+Baseline correction и preprocessing
+        ↓
+Delta-базирано spike encoding
+        ↓
+Обучение на SNN и квантизация на теглата
+        ↓
+FPGA SNN инференция върху PYNQ-Z2 / Zynq-7020
+```
+
+Следователно камерата не е само механичен аксесоар. Тя е компонент, който влияе директно върху качеството на dataset-а, signal-to-noise ratio, повторяемостта във времето, дрейфа на сензорите и надеждността на тренировъчните данни за спайковата невронна мрежа.
+
+---
+
+## 4. Флуидна архитектура
+
+Камерата използва **двуконтурна флуидна архитектура**:
+
+1. **Първичен вътрешен контур**  
+   Високодебитен вътрешен циркулационен контур, задвижван от аксиален вентилатор. Неговата роля е бърза хомогенизация на въздушния обем вътре в камерата.
+
+2. **Вторичен пробовземен контур**  
+   Нискодебитен пасивен път за екстракция, който транспортира аналит от външен headspace съд към камерата чрез PTFE тръба. Неговата роля е да въвежда газовата проба с контролиран дебит, без да нарушава термичната стабилност на сензорите.
+
+Това разделяне позволява камерата да комбинира бързо смесване с меко и стабилно излагане на сензорите.
+
+---
+
+## 5. Първичен контур: вътрешно смесване и хомогенизация
+
+Първичният контур се генерира от високоскоростен аксиален вентилатор, монтиран в горната част на камерата. Вместо да духа директно върху сензорния масив, потокът от вентилатора се насочва през тангенциални канали, интегрирани в аеродинамичния капак.
+
+Тези тангенциални канали инжектират въздуха по стените на камерата и създават контролиран циклонен поток. Целта на този поток е хомогенизация на обема и намаляване на концентрационните градиенти.
+
+Дизайн моделът приема следните стойности:
+
+| Параметър | Проектна оценка |
+|---|---:|
+| Обем на основната камера | приблизително 1.2 L |
+| Работен диференциал на налягането | приблизително 39 Pa |
+| Диаметър на геометричния дросел | 6.5 mm |
+| Оценен първичен вътрешен дебит | приблизително 40 L/min |
+| Приблизителни обмени на обема | приблизително 33 пъти в минута |
+
+Тези стойности са аналитични проектни оценки, получени от геометрията и опростени флуидно-динамични предположения. Ако се използват като крайни метрологични данни, трябва да бъдат експериментално потвърдени чрез измерване на дебит или налягане.
+
+---
+
+## 6. Honeycomb дифузор и ламинаризация
+
+Въпреки че първичният вихър подобрява смесването, директната турбулентност върху метал-оксидните сензори е нежелана. Затова камерата включва **40 mm honeycomb diffuser insert**, който действа като геометричен изправител на потока.
+
+Неговата цел е да:
+
+- раздели големия вихров поток на множество малки паралелни канали;
+- потисне напречните компоненти на скоростта;
+- намали локалната турбулентност около сензорната повърхност;
+- създаде по-равномерен cross-flow над сензорната плоча;
+- подобри повторяемостта на преходния сензорен отговор.
+
+OpenSCAD моделът реализира дифузора като drop-in honeycomb структура с интегрирани монтажни колони. Геометрията намалява ефективния хидравличен диаметър на пътищата на потока и подпомага по-стабилни условия преди газът да достигне сензорите.
+
+---
+
+## 7. Вторичен контур: пасивна екстракция на пробата
+
+Вторичният контур транспортира аналит от външен headspace съд към камерата чрез химически инертна PTFE тръба. Това избягва директното поставяне на хранителната проба върху сензорната плоча и прави измерването по-повтаряемо.
+
+Текущата проектна документация приема:
+
+| Параметър | Проектна стойност |
+|---|---:|
+| Обем на headspace съда | приблизително 115 mL |
+| Вътрешен радиус на PTFE тръбата | 1 mm |
+| Дължина на PTFE тръбата | приблизително 0.4 m |
+| Движещ диференциал на налягането | приблизително 39 Pa |
+| Оценен дебит на пробовземане | приблизително 127 mL/min |
+| Приблизително време за обмен на съда | приблизително 54 s |
+
+Дебитът се оценява чрез уравнението на Хаген–Поазьой за ламинарен поток в цилиндрична тръба:
+
+\[
+Q = \frac{\Delta P \cdot \pi r^4}{8 \mu L}
+\]
+
+където \(\Delta P\) е диференциалът на налягането, \(r\) е радиусът на тръбата, \(\mu\) е динамичният вискозитет на въздуха, а \(L\) е дължината на тръбата.
+
+Ключов аспект е зависимостта от четвърта степен на радиуса. Малки промени в диаметъра на тръбата могат силно да променят дебита. Затова диаметърът и дължината на тръбата трябва да се запазват постоянни между експериментите.
+
+---
+
+## 8. Термодинамика на сензорите
+
+MQ газовите сензори използват нагрети метал-оксидни повърхности, често базирани на калаен диоксид. Техният отговор зависи от повърхностни реакции между адсорбирани кислородни видове и редуциращи газове. Температурата на нагревателя силно влияе върху адсорбцията, десорбцията, повърхностната проводимост и baseline съпротивлението.
+
+Основен риск при електронните носове е конвективното охлаждане на сензорната повърхност. Ако потокът над чувствителния слой е прекалено силен или нестабилен, baseline-ът може да се измести поради термични ефекти, а не поради концентрация на аналита.
+
+Затова камерата разделя високодебитното смесване от нискодебитното излагане на пробата. Първичният контур хомогенизира камерата, а вторичният контур въвежда пробовия газ с ограничен дебит. Това помага за намаляване на термичното смущение върху микронагревателите на сензорите.
+
+---
+
+## 9. Виброизолация
+
+Дизайнът включва няколко TPU-базирани вискоеластични елемента:
+
+- гарнитури за капака;
+- гарнитура за изолация на вентилатора;
+- окачваща гарнитура за вентилатора;
+- TPU шайби;
+- омекотяващи крачета;
+- purge тапа.
+
+Тези компоненти имат две основни функции:
+
+1. **Херметизация**  
+   TPU гарнитурите подобряват уплътняването между твърдите принтирани детайли.
+
+2. **Механично декуплиране**  
+   TPU елементите намаляват преноса на вибрации от вентилатора към корпуса и сензорната плоча.
+
+Това е важно, защото механичните вибрации могат да се прехвърлят към проводници, сензорни платки, конектори и аналогова входна електроника.
+
+---
+
+## 10. Пасивация на повърхностите и memory effect
+
+FDM-принтираните полимерни повърхности не са идеални аналитични повърхности. Те могат да съдържат слоеви линии, микропори, грапавини и химически активни места. VOC молекули могат да се адсорбират по тези повърхности и да се десорбират бавно при следващи измервания, създавайки memory effect.
+
+За научни експерименти вътрешните повърхности на камерата трябва да бъдат пасивирани. Тънък слой химически устойчиво, нискоизпаримо покритие с ниска повърхностна енергия може да намали адсорбцията и да подобри възстановяването между runs.
+
+Препоръчителни зони за пасивация:
+
+- вътрешна стена на основната флуидна камера;
+- вътрешни повърхности на капака;
+- пътят на пробовия газ;
+- повърхности, изложени на богат на аналит газ.
+
+Процесът на пасивация трябва да се документира в експерименталния протокол, защото влияе пряко върху повторяемостта на dataset-а.
+
+---
+
+## 11. Purge протокол
+
+Камерата включва purge функция, която позволява бързо премахване на остатъчния аналит между експериментите. Purge тапата може да се отвори, за да се намали аеродинамичният импеданс и да се позволи високодебитно промиване със стаен въздух.
+
+Purge цикълът е необходим за:
+
+- премахване на остатъчни VOCs;
+- възстановяване на baseline-а;
+- намаляване на cross-contamination;
+- подобряване на повторяемостта;
+- избягване на temporal leakage между класове проби.
+
+Препоръчителна практическа процедура:
+
+```text
+1. Премахване или изолиране на предходната проба.
+2. Отваряне на purge пътя.
+3. Работа на вентилатора за фиксирано purge време.
+4. Наблюдение на възстановяването на baseline-а.
+5. Стартиране на следващия run само след стабилизиране на baseline-а.
+```
+
+За публикационни експерименти purge времето трябва да се определи експериментално от кривите на възстановяване на baseline-а, а не само от теоретични оценки на въздушния обмен.
+
+---
+
+## 12. Структура на CAD модела
+
+Файлът `enose_chamber_parametric.scad` съдържа пълния параметричен модел на камерата.
+
+OpenSCAD моделът поддържа няколко режима за визуализация и export чрез параметъра `view_mode`:
+
+```scad
+view_mode = "print_layout";
+```
+
+Налични режими:
+
+| Режим | Описание |
+|---|---|
+| `assembly` | Пълна exploded assembly визуализация |
+| `print_layout` | Всички детайли подредени върху build plate |
+| `part_base` | Export на основната флуидна камера |
+| `part_plate` | Export на универсалната сензорна плоча |
+| `part_diffuser` | Export на honeycomb дифузора |
+| `part_lid` | Export на аеродинамичния капак |
+| `part_dome` | Export на широкия купол за вентилатора |
+| `tpu_lid_gaskets` | Export на основните TPU гарнитури |
+| `tpu_purge_plug` | Export на ергономичната purge тапа |
+| `tpu_fan_gasket` | Export на гарнитурата за изолация на вентилатора |
+| `tpu_washers` | Export на TPU шайби за болтовете на купола |
+| `tpu_feet` | Export на омекотяващи TPU крачета |
+
+---
+
+## 13. Основни принтирани компоненти
+
+| Компонент | Функция | Препоръчителен материал |
+|---|---|---|
+| `flow_chamber` | Основно тяло на камерата с приблизителен обем 1.2 L | PETG / ABS / ASA |
+| `sensor_plate` | Универсална перфорирана плоча за сензори | PETG / ABS / ASA |
+| `diffuser_insert` | 40 mm honeycomb изправител на потока | PETG / ABS / ASA |
+| `lid_pro` | Аеродинамичен капак с тангенциални канали | PETG / ABS / ASA |
+| `fan_dome_ultimate` | Wide-body купол за вентилатора | PETG / ABS / ASA |
+| `tpu_lid_gaskets` | Основни херметизиращи гарнитури | TPU 95A |
+| `tpu_purge_plug` | Ръчна purge тапа | TPU 95A |
+| `tpu_fan_gasket` | Гарнитура за виброизолация на вентилатора | TPU 95A |
+| `tpu_washers` | Виброизолиращи шайби за купола | TPU 95A |
+| `tpu_feet` | Омекотяващи крачета | TPU 95A |
+
+---
+
+## 14. Основни параметрични размери
+
+Текущият OpenSCAD модел използва следните основни параметри:
+
+| Параметър | Стойност | Описание |
+|---|---:|---|
+| `fc_w` | 144 mm | Външна ширина на основата |
+| `fc_l` | 144 mm | Външна дължина на основата |
+| `fc_h` | 60 mm | Вътрешна височина на първичния въздушен стълб |
+| `fc_r` | 15 mm | Радиус на външните ъгли |
+| `wall_t` | 4.0 mm | Дебелина на стените |
+| `bot_t` | 4.0 mm | Дебелина на дъното |
+| `sp_mount_xy` | 100 mm | Разстояние между монтажните отвори на сензорната плоча |
+| `fan_size` | 62 mm | Footprint на вентилатора с толеранс |
+| `fan_hole` | 58 mm | Активен диаметър на входа на вентилатора |
+| `fan_mount` | 25 mm | Отместване на монтажните отвори на вентилатора |
+| `fan_thickness` | 20 mm | Целева дебелина на вентилатора |
+| `tpu_t` | 1.2 mm | Дебелина на fan isolation gasket |
+| `gasket_h` | 3.2 mm | Дълбочина на каналите за гарнитури |
+| `tol` | 0.2 mm | Общ толеранс за 3D печат |
+
+Тези параметри могат да се променят за адаптация към други вентилатори, сензорни плочи или производствени толеранси.
+
+---
+
+## 15. Препоръки за производство
+
+Препоръчителни твърди материали:
+
+- PETG;
+- ABS;
+- ASA.
+
+Препоръчителен гъвкав материал:
+
+- TPU 95A за гарнитури, шайби, purge тапа и крачета.
+
+Общи препоръки за печат:
+
+| Параметър | Препоръка |
+|---|---|
+| Layer height | 0.16–0.24 mm |
+| Perimeters | 4 или повече |
+| Infill | 25–40%, gyroid или cubic |
+| Top/bottom layers | 5 или повече |
+| Твърди детайли | PETG / ABS / ASA |
+| Гарнитури | TPU 95A |
+| Supports | Дизайнът е предвиден да е support-free, когато е възможно |
+
+При експерименти с газови сензори херметичността е по-важна от визуалното качество на повърхността. При нужда увеличете броя на стените.
+
+---
+
+## 16. Bill of Materials
+
+| Категория | Елемент | Количество | Бележки |
+|---|---|---:|---|
+| Филамент | PETG / ABS / ASA | приблизително 300 g | Твърди детайли |
+| Филамент | TPU 95A | приблизително 10–20 g | Гарнитури, шайби, тапа, крачета |
+| Вентилатор | Sunon EE60201B1 или съвместим 60 mm вентилатор | 1 | Високоскоростен аксиален вентилатор |
+| Вложки | M3 heat-set inserts | 12 бр. | За многократен монтаж |
+| Болтове | M3 bolts | според нуждите | Капак, купол, дифузор |
+| Пневматични фитинги | PC4-M6 или съвместими | 1–2 бр. | Свързване на пробовата тръба |
+| Тръба | PTFE tube, 2 mm ID | приблизително 0.4–0.5 m | Транспорт на пробата |
+| Покритие | Нискоизпарима епоксидна смола или съвместимо покритие | според нуждите | Пасивация на повърхностите |
+
+---
+
+## 17. Общ монтаж
+
+Препоръчителна последователност за монтаж:
+
+```text
+1. Принтирайте твърдите детайли от PETG, ABS или ASA.
+2. Принтирайте TPU гарнитурите, fan gasket, шайбите, purge тапата и крачетата.
+3. Инсталирайте M3 heat-set inserts в основата и капака.
+4. Монтирайте сензорната плоча в камерата.
+5. Поставете honeycomb дифузора над сензорната зона.
+6. Поставете гарнитурата на капака и монтирайте аеродинамичния капак.
+7. Монтирайте вентилатора между TPU изолационните гарнитури.
+8. Монтирайте fan dome и TPU шайбите.
+9. Инсталирайте PTFE тръбата и пневматичните фитинги.
+10. Уплътнете и пасивирайте вътрешните повърхности, ако е необходимо.
+11. Извършете leak test и purge test.
+12. Изпълнете baseline stability tests преди събиране на dataset.
+```
+
+---
+
+## 18. Експериментална употреба
+
+Препоръчителен measurement run включва:
+
+```text
+1. Purge на камерата
+2. Baseline acquisition
+3. Свързване или излагане на пробата
+4. Интервал за стабилизиране
+5. Активен запис
+6. Премахване на пробата
+7. Post-run purge
+8. Проверка за възстановяване на baseline-а
+```
+
+Препоръчителни metadata полета за всеки run:
+
+| Поле | Описание |
+|---|---|
+| `Run_ID` | Уникален идентификатор на измерването |
+| `Batch_ID` | Идентификатор на партидата |
+| `Product` | Тип храна или аналит |
+| `True_Class` | Експериментален етикет, например Fresh / Warning / Spoiled |
+| `Timestamp` | Време на измерването |
+| `Temperature` | Температура в камерата или средата |
+| `Humidity` | Относителна влажност |
+| `Purge_Time` | Продължителност на purge преди run |
+| `Baseline_Duration` | Продължителност на baseline acquisition |
+| `Recording_Duration` | Продължителност на активния запис |
+| `Notes` | Експериментални бележки |
+
+---
+
+## 19. Интеграция с невроморфния FPGA pipeline
+
+Камерата осигурява физическия източник на данни за целия невроморфен pipeline:
+
+```text
+Измерване в камерата
+        ↓
+Сурови сензорни стойности
+        ↓
+Baseline-corrected стойности
+        ↓
+Извличане на времеви delta промени
+        ↓
+Положителни и отрицателни spike канали
+        ↓
+12-битови spike masks
+        ↓
+Dataset за SNN обучение
+        ↓
+Квантизирани тегла
+        ↓
+FPGA SNN инференция
+```
+
+Това прави камерата съществена част от системата, а не само аксесоар. Всяка промяна в геометрията, дължината на тръбата, скоростта на вентилатора, purge процедурата или повърхностното покритие може да промени разпределението на dataset-а и трябва да бъде документирана.
+
+---
+
+## 20. Научни бележки и ограничения
+
+Текущият дизайн на камерата е базиран на аналитични флуидно-динамични оценки и параметрична CAD реализация. Посочените стойности за налягане, дебит и време за обмен трябва да се интерпретират като проектни оценки, освен ако не са независимо измерени.
+
+Препоръчителни валидационни стъпки:
+
+- измерване на реалния диференциал на налягането;
+- измерване на дебита във вторичния контур;
+- измерване на purge recovery time;
+- запис на baseline stability във времето;
+- сравнение на сензорен отговор със и без виброизолация;
+- оценка на повторяемостта между runs;
+- оценка на memory effect преди и след пасивация.
+
+---
+
+## 21. Бъдещи подобрения
+
+Планирани или препоръчителни бъдещи разработки:
+
+- експериментална airflow валидация;
+- интеграция на сензор за налягане;
+- интеграция на flow sensor;
+- PWM контрол на вентилатора;
+- сменяем адаптер за sample vial;
+- подобрен протокол за пасивация;
+- версия с температурна стабилизация;
+- CFD симулация на първичния и вторичния контур;
+- сравнение между vortex-only и diffuser-assisted режим;
+- пълно изследване на качеството на dataset-а с реални хранителни проби.
+
+---
+
+## 22. Цитиране
+
+Ако използвате този дизайн в научна или изследователска работа, моля цитирайте repository-то:
+
+```bibtex
+@misc{neuromorphic_enose_chamber,
+  author = {H. Vrosy},
+  title = {Advanced E-Nose Fluidic Chamber for Neuromorphic e-Nose on FPGA},
+  year = {2026},
+  howpublished = {GitHub repository},
+  note = {Parametric dual-loop fluidic chamber for gas-sensor arrays and electronic-nose data acquisition}
+}
+```
