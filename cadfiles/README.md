@@ -927,18 +927,5 @@ FPGA SNN инференция
 - сравнение между vortex-only и diffuser-assisted режим;
 - пълно изследване на качеството на dataset-а с реални хранителни проби.
 
----
 
-## 22. Цитиране
 
-Ако използвате този дизайн в научна или изследователска работа, моля цитирайте repository-то:
-
-```bibtex
-@misc{neuromorphic_enose_chamber,
-  author = {H. Vrosy},
-  title = {Advanced E-Nose Fluidic Chamber for Neuromorphic e-Nose on FPGA},
-  year = {2026},
-  howpublished = {GitHub repository},
-  note = {Parametric dual-loop fluidic chamber for gas-sensor arrays and electronic-nose data acquisition}
-}
-```
