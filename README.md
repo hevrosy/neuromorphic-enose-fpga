@@ -942,106 +942,7 @@ These results are planned for the next experimental stage.
 
 ---
 
-## 23. Recommended Repository Structure
-
-```text
-neuromorphic-enose-fpga/
-│
-├── README.md
-│
-├── docs/
-│   ├── system_architecture.md
-│   ├── measurement_chamber.md
-│   ├── experimental_protocol.md
-│   ├── spike_encoding.md
-│   ├── training_pipeline.md
-│   ├── fpga_implementation.md
-│   └── figures/
-│
-├── hardware/
-│   ├── vivado_project/
-│   ├── rtl/
-│   ├── ip_repo/
-│   ├── constraints/
-│   ├── bitstream/
-│   └── reports/
-│
-├── software/
-│   ├── acquisition/
-│   ├── preprocessing/
-│   ├── spike_encoding/
-│   ├── training/
-│   ├── quantization/
-│   ├── evaluation/
-│   └── pynq/
-│
-├── chamber/
-│   ├── cad/
-│   ├── photos/
-│   ├── airflow_notes.md
-│   └── bill_of_materials.md
-│
-├── datasets/
-│   ├── raw/
-│   ├── processed/
-│   ├── windows/
-│   └── evaluation/
-│
-├── results/
-│   ├── vivado_utilization/
-│   ├── timing/
-│   ├── power/
-│   ├── simulation/
-│   └── classification/
-│
-└── references/
-```
-
----
-
-## 24. Recommended Figures
-
-The following figures are recommended for complete documentation:
-
-1. **Measurement chamber photo or CAD model**
-   Shows the physical chamber, sample location, sensors, and airflow.
-
-2. **Headspace measurement principle**
-   Food sample → volatile compounds → gas sensor array.
-
-3. **Complete system architecture**
-   Chamber, sensors, acquisition, preprocessing, SNN training, FPGA inference.
-
-4. **Raw sensor response**
-   Time-series data from the gas sensors.
-
-5. **Baseline-corrected response**
-   Sensor data after baseline correction.
-
-6. **Delta spike encoding**
-   Conversion from sensor signal to positive and negative spikes.
-
-7. **Spike raster diagram**
-   Twelve input spike channels over one temporal window.
-
-8. **SNN topology**
-   12–32–3 network architecture.
-
-9. **Vivado block design**
-   The implemented FPGA overlay.
-
-10. **FPGA resource utilization chart**
-    LUT, FF, BRAM, and DSP usage.
-
-11. **Behavioral simulation waveform**
-    Start, done, input masks, output counts, and latency.
-
-12. **Confusion matrix**
-    To be added after real dataset evaluation.
-
----
-
-## 25. Future Work
+## 23. Future Work
 
 Planned next steps include:
 
@@ -1061,7 +962,7 @@ Planned next steps include:
 
 ---
 
-## 26. Scientific Relevance
+## 24. Scientific Relevance
 
 This project demonstrates a practical approach for combining electronic-nose sensing, event-based encoding, and FPGA-based neuromorphic inference. The central idea is that gas-sensor time-series data can be represented as event streams rather than dense numerical vectors.
 
@@ -1080,23 +981,7 @@ The project is relevant to:
 
 ---
 
-## 27. Short LinkedIn Description
-
-I am developing a neuromorphic FPGA-based electronic-nose system for gas-sensor data analysis and food-quality assessment.
-
-The project combines a custom headspace measurement chamber, gas and environmental sensors, a software preprocessing and training pipeline, delta-based spike encoding, and a hardware spiking neural network accelerator implemented on a Xilinx Zynq-7020 SoC.
-
-The current FPGA implementation includes a 12–32–3 SNN accelerator, a hardware preprocessing block, and an AXI-based control interface. The design was synthesized and implemented in Vivado 2025.2 for the PYNQ-Z2 board. Implementation results show low resource utilization: 4.95% LUT, 2.41% FF, 0.71% BRAM, and 0% DSP. Behavioral simulation reports deterministic inference latency of 5172 clock cycles, corresponding to 51.72 μs at 100 MHz.
-
-The next stage is experimental validation on a real dataset of food samples using accuracy, F1-score, and confusion matrix.
-
----
-
-## 28. Citation
-
-
-
-## 29. License
+## 25. License
 
 This project is developed for research and educational purposes.
 
@@ -1104,7 +989,7 @@ MIT License
 
 
 
-## 30. Conclusion
+## 26. Conclusion
 
 This repository presents an integrated approach to building a neuromorphic electronic-nose system on FPGA. The system includes a measurement chamber, sensor acquisition pipeline, spike encoding, software SNN training workflow, weight quantization, and FPGA-based spiking inference.
 
@@ -2048,106 +1933,7 @@ Real dataset classification metrics: предстоящи
 
 ---
 
-## 20. Препоръчителна структура на repository
-
-```text
-neuromorphic-enose-fpga/
-│
-├── README.md
-│
-├── docs/
-│   ├── system_architecture.md
-│   ├── measurement_chamber.md
-│   ├── experimental_protocol.md
-│   ├── spike_encoding.md
-│   ├── training_pipeline.md
-│   ├── fpga_implementation.md
-│   └── figures/
-│
-├── hardware/
-│   ├── vivado_project/
-│   ├── rtl/
-│   ├── ip_repo/
-│   ├── constraints/
-│   ├── bitstream/
-│   └── reports/
-│
-├── software/
-│   ├── acquisition/
-│   ├── preprocessing/
-│   ├── spike_encoding/
-│   ├── training/
-│   ├── quantization/
-│   ├── evaluation/
-│   └── pynq/
-│
-├── chamber/
-│   ├── cad/
-│   ├── photos/
-│   ├── airflow_notes.md
-│   └── bill_of_materials.md
-│
-├── datasets/
-│   ├── raw/
-│   ├── processed/
-│   ├── windows/
-│   └── evaluation/
-│
-├── results/
-│   ├── vivado_utilization/
-│   ├── timing/
-│   ├── power/
-│   ├── simulation/
-│   └── classification/
-│
-└── references/
-```
-
----
-
-## 21. Препоръчителни фигури
-
-За README и научна документация е препоръчително да се добавят:
-
-1. **Снимка или CAD модел на измервателната камера**
-   Показва физическата постановка, пробата, сензорите и въздушния поток.
-
-2. **Схема на headspace measurement принципа**
-   Проба → летливи съединения → сензорен масив.
-
-3. **Обща системна архитектура**
-   Камера, сензори, acquisition, preprocessing, SNN training, FPGA inference.
-
-4. **Raw sensor response**
-   Сурови сензорни сигнали във времето.
-
-5. **Baseline-corrected response**
-   Сензорни сигнали след baseline correction.
-
-6. **Delta spike encoding**
-   Преобразуване от сензорен сигнал към положителни и отрицателни спайкове.
-
-7. **Spike raster diagram**
-   12 входни спайкови канала за един прозорец.
-
-8. **SNN topology**
-   12–32–3 архитектура.
-
-9. **Vivado block design**
-   Реалният FPGA overlay.
-
-10. **FPGA resource utilization chart**
-    LUT, FF, BRAM, DSP.
-
-11. **Behavioral simulation waveform**
-    Start, done, input masks, output counts, latency.
-
-12. **Confusion matrix**
-    След бъдещата експериментална оценка.
-
----
-
-## 22. Научна значимост
+## 20. Научна значимост
 
 Проектът демонстрира практически подход за комбиниране на електронен нос, невроморфно кодиране и FPGA-базирана инференция. Основната научна идея е, че газовите сензорни сигнали могат да бъдат представени като събитийни времеви последователности, а не само като плътни числови вектори.
 
@@ -2163,21 +1949,7 @@ neuromorphic-enose-fpga/
 * електронни носове;
 * мониторинг на хранителни продукти.
 
----
-
-## 23. Кратко описание за LinkedIn
-
-Разработвам невроморфна FPGA-базирана електронна обонятелна система за анализ на газови сензорни данни и оценка на качеството на хранителни продукти.
-
-Проектът включва специализирана измервателна камера за събиране на headspace газови проби, масив от газови и околни сензори, software pipeline за preprocessing и обучение, delta-базирано spike encoding и FPGA ускорител за спайкова невронна мрежа върху Xilinx Zynq-7020 SoC.
-
-Текущата FPGA реализация включва SNN accelerator с топология 12–32–3, хардуерен preprocessing блок и AXI-базиран интерфейс за управление. Дизайнът е синтезиран и имплементиран във Vivado 2025.2 за PYNQ-Z2. Получените резултати показват ниско използване на ресурсите: 4.95% LUT, 2.41% FF, 0.71% BRAM и 0% DSP. Поведенческата симулация отчита детерминирана инференция от 5172 такта, което съответства на 51.72 μs при 100 MHz.
-
-Следващият етап е експериментална валидация върху реален dataset от хранителни проби и оценка чрез accuracy, F1-score и confusion matrix.
-
----
-
-## 24. Статус на проекта
+## 21. Статус на проекта
 
 ```text
 Measurement chamber: developed as part of the system
@@ -2197,7 +1969,7 @@ Real dataset classification metrics: in progress
 
 ---
 
-## 25. Бъдещо развитие
+## 22. Бъдещо развитие
 
 Планирани следващи стъпки:
 
@@ -2217,10 +1989,7 @@ Real dataset classification metrics: in progress
 
 ---
 
-## 26. Citation
-
-
-## 27. Заключение
+## 23. Заключение
 
 Този проект представя интегриран подход за изграждане на невроморфна електронна обонятелна система върху FPGA. Системата включва измервателна камера, сензорен acquisition pipeline, spike encoding, software обучение на SNN модел и хардуерна инференция чрез FPGA ускорител.
 
