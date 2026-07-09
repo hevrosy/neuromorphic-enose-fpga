@@ -981,15 +981,7 @@ The project is relevant to:
 
 ---
 
-## 25. License
-
-This project is developed for research and educational purposes.
-
-MIT License
-
-
-
-## 26. Conclusion
+## 25. Conclusion
 
 This repository presents an integrated approach to building a neuromorphic electronic-nose system on FPGA. The system includes a measurement chamber, sensor acquisition pipeline, spike encoding, software SNN training workflow, weight quantization, and FPGA-based spiking inference.
 
